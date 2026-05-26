@@ -105,7 +105,8 @@ export function OnboardingFlow() {
       const { error: upErr } = await supabase
         .from("patients")
         .update({
-          blood_type: data.bloodType || null,
+          blood_type: (data.bloodType || null) as
+            | "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-" | "unknown" | null,
           insurance_name: data.insuranceName || null,
           insurance_number: data.insuranceNumber || null,
         })
