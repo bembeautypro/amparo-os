@@ -14,16 +14,285 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      emergency_contacts: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          patient_id: string
+          phone: string
+          relation: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          patient_id: string
+          phone: string
+          relation?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          patient_id?: string
+          phone?: string
+          relation?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emergency_contacts_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      families: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      family_members: {
+        Row: {
+          created_at: string
+          family_id: string
+          id: string
+          relation: Database["public"]["Enums"]["member_relation"]
+          role: Database["public"]["Enums"]["family_role"]
+          status: Database["public"]["Enums"]["member_status"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          family_id: string
+          id?: string
+          relation?: Database["public"]["Enums"]["member_relation"]
+          role?: Database["public"]["Enums"]["family_role"]
+          status?: Database["public"]["Enums"]["member_status"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          family_id?: string
+          id?: string
+          relation?: Database["public"]["Enums"]["member_relation"]
+          role?: Database["public"]["Enums"]["family_role"]
+          status?: Database["public"]["Enums"]["member_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_members_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medications: {
+        Row: {
+          created_at: string
+          dosage: string | null
+          frequency: string | null
+          id: string
+          name: string
+          notes: string | null
+          patient_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dosage?: string | null
+          frequency?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          patient_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dosage?: string | null
+          frequency?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          patient_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medications_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_allergies: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          patient_id: string
+          severity: Database["public"]["Enums"]["severity_level"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          patient_id: string
+          severity?: Database["public"]["Enums"]["severity_level"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          patient_id?: string
+          severity?: Database["public"]["Enums"]["severity_level"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_allergies_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_conditions: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          patient_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          patient_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          patient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_conditions_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patients: {
+        Row: {
+          birth_date: string | null
+          blood_type: Database["public"]["Enums"]["blood_type"] | null
+          created_at: string
+          family_id: string
+          full_name: string
+          id: string
+          insurance_name: string | null
+          insurance_number: string | null
+          photo_url: string | null
+          relation: string | null
+          updated_at: string
+        }
+        Insert: {
+          birth_date?: string | null
+          blood_type?: Database["public"]["Enums"]["blood_type"] | null
+          created_at?: string
+          family_id: string
+          full_name: string
+          id?: string
+          insurance_name?: string | null
+          insurance_number?: string | null
+          photo_url?: string | null
+          relation?: string | null
+          updated_at?: string
+        }
+        Update: {
+          birth_date?: string | null
+          blood_type?: Database["public"]["Enums"]["blood_type"] | null
+          created_at?: string
+          family_id?: string
+          full_name?: string
+          id?: string
+          insurance_name?: string | null
+          insurance_number?: string | null
+          photo_url?: string | null
+          relation?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patients_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_family_admin: {
+        Args: { _family_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_family_member: {
+        Args: { _family_id: string; _user_id: string }
+        Returns: boolean
+      }
+      patient_family: { Args: { _patient_id: string }; Returns: string }
     }
     Enums: {
-      [_ in never]: never
+      blood_type:
+        | "A+"
+        | "A-"
+        | "B+"
+        | "B-"
+        | "AB+"
+        | "AB-"
+        | "O+"
+        | "O-"
+        | "unknown"
+      family_role: "admin" | "member" | "caregiver"
+      member_relation: "child" | "spouse" | "caregiver" | "other"
+      member_status: "active" | "invited"
+      severity_level: "low" | "medium" | "high"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +419,12 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      blood_type: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "unknown"],
+      family_role: ["admin", "member", "caregiver"],
+      member_relation: ["child", "spouse", "caregiver", "other"],
+      member_status: ["active", "invited"],
+      severity_level: ["low", "medium", "high"],
+    },
   },
 } as const
