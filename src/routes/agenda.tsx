@@ -39,11 +39,22 @@ function AgendaPage() {
     },
   });
 
-  const newHref = activeFamily ? `/familia/${activeFamily.id}/agenda/novo` : "#";
   const now = new Date();
   const items = data ?? [];
   const upcoming = items.filter((a) => isAfter(parseISO(a.scheduled_at), now));
   const past = items.filter((a) => !isAfter(parseISO(a.scheduled_at), now));
+
+  const NewBtn = ({ label }: { label: string }) =>
+    activeFamily ? (
+      <Button asChild className="h-11 gap-2">
+        <Link
+          to="/familia/$familyId/agenda/novo"
+          params={{ familyId: activeFamily.id }}
+        >
+          <Plus className="h-4 w-4" /> {label}
+        </Link>
+      </Button>
+    ) : null;
 
   return (
     <div className="space-y-8">
@@ -54,16 +65,9 @@ function AgendaPage() {
             ? `Consultas e compromissos de ${activePatient.name}.`
             : "Selecione um familiar para ver a agenda."
         }
-        action={
-          activeFamily && (
-            <Button asChild className="h-11 gap-2">
-              <Link to={newHref}>
-                <Plus className="h-4 w-4" /> Nova consulta
-              </Link>
-            </Button>
-          )
-        }
+        action={<NewBtn label="Nova consulta" />}
       />
+
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Carregando…</p>
