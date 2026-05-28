@@ -58,7 +58,7 @@ function NewMedicationPage() {
     onSuccess: () => {
       toast.success("Medicamento adicionado");
       qc.invalidateQueries({ queryKey: ["medications"] });
-      navigate({ to: `/familia/${familyId}/medicamentos` });
+      navigate({ to: "/familia/$familyId/medicamentos", params: { familyId } });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -145,7 +145,7 @@ function NewMedicationPage() {
               type="button"
               variant="outline"
               className="h-11"
-              onClick={() => navigate({ to: `/familia/${familyId}/medicamentos` })}
+              onClick={() => navigate({ to: "/familia/$familyId/medicamentos", params: { familyId } })}
             >
               Cancelar
             </Button>
