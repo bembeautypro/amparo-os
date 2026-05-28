@@ -32,7 +32,7 @@ export const Route = createFileRoute("/documentos")({
 
 function DocumentsPage() {
   const { activePatient, activeFamily } = useFamilyContext();
-  const newHref = activeFamily ? `/familia/${activeFamily.id}/documentos/novo` : "#";
+  
 
   const { data, isLoading } = useQuery({
     queryKey: ["documents", activePatient?.id],

@@ -22,7 +22,7 @@ export const Route = createFileRoute("/familia/$familyId/medicamentos")({
 function MedicationsPage() {
   const { familyId } = useParams({ from: "/familia/$familyId/medicamentos" });
   const { activePatient } = useFamilyContext();
-  const newHref = `/familia/${familyId}/medicamentos/novo`;
+  
 
   const { data, isLoading } = useQuery({
     queryKey: ["medications", activePatient?.id],
