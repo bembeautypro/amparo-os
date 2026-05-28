@@ -10,14 +10,27 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as FamiliaRouteImport } from './routes/familia'
+import { Route as DocumentosRouteImport } from './routes/documentos'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FamiliaFamilyIdMedicamentosRouteImport } from './routes/familia.$familyId.medicamentos'
+import { Route as FamiliaFamilyIdMedicamentosNovoRouteImport } from './routes/familia.$familyId.medicamentos.novo'
+import { Route as FamiliaFamilyIdDocumentosNovoRouteImport } from './routes/familia.$familyId.documentos.novo'
+import { Route as FamiliaFamilyIdAgendaNovoRouteImport } from './routes/familia.$familyId.agenda.novo'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerfilRoute = PerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -30,9 +43,24 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FamiliaRoute = FamiliaRouteImport.update({
+  id: '/familia',
+  path: '/familia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentosRoute = DocumentosRouteImport.update({
+  id: '/documentos',
+  path: '/documentos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgendaRoute = AgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -40,42 +68,134 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FamiliaFamilyIdMedicamentosRoute =
+  FamiliaFamilyIdMedicamentosRouteImport.update({
+    id: '/$familyId/medicamentos',
+    path: '/$familyId/medicamentos',
+    getParentRoute: () => FamiliaRoute,
+  } as any)
+const FamiliaFamilyIdMedicamentosNovoRoute =
+  FamiliaFamilyIdMedicamentosNovoRouteImport.update({
+    id: '/novo',
+    path: '/novo',
+    getParentRoute: () => FamiliaFamilyIdMedicamentosRoute,
+  } as any)
+const FamiliaFamilyIdDocumentosNovoRoute =
+  FamiliaFamilyIdDocumentosNovoRouteImport.update({
+    id: '/$familyId/documentos/novo',
+    path: '/$familyId/documentos/novo',
+    getParentRoute: () => FamiliaRoute,
+  } as any)
+const FamiliaFamilyIdAgendaNovoRoute =
+  FamiliaFamilyIdAgendaNovoRouteImport.update({
+    id: '/$familyId/agenda/novo',
+    path: '/$familyId/agenda/novo',
+    getParentRoute: () => FamiliaRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/agenda': typeof AgendaRoute
   '/dashboard': typeof DashboardRoute
+  '/documentos': typeof DocumentosRoute
+  '/familia': typeof FamiliaRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/perfil': typeof PerfilRoute
   '/register': typeof RegisterRoute
+  '/familia/$familyId/medicamentos': typeof FamiliaFamilyIdMedicamentosRouteWithChildren
+  '/familia/$familyId/agenda/novo': typeof FamiliaFamilyIdAgendaNovoRoute
+  '/familia/$familyId/documentos/novo': typeof FamiliaFamilyIdDocumentosNovoRoute
+  '/familia/$familyId/medicamentos/novo': typeof FamiliaFamilyIdMedicamentosNovoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/agenda': typeof AgendaRoute
   '/dashboard': typeof DashboardRoute
+  '/documentos': typeof DocumentosRoute
+  '/familia': typeof FamiliaRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/perfil': typeof PerfilRoute
   '/register': typeof RegisterRoute
+  '/familia/$familyId/medicamentos': typeof FamiliaFamilyIdMedicamentosRouteWithChildren
+  '/familia/$familyId/agenda/novo': typeof FamiliaFamilyIdAgendaNovoRoute
+  '/familia/$familyId/documentos/novo': typeof FamiliaFamilyIdDocumentosNovoRoute
+  '/familia/$familyId/medicamentos/novo': typeof FamiliaFamilyIdMedicamentosNovoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/agenda': typeof AgendaRoute
   '/dashboard': typeof DashboardRoute
+  '/documentos': typeof DocumentosRoute
+  '/familia': typeof FamiliaRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/perfil': typeof PerfilRoute
   '/register': typeof RegisterRoute
+  '/familia/$familyId/medicamentos': typeof FamiliaFamilyIdMedicamentosRouteWithChildren
+  '/familia/$familyId/agenda/novo': typeof FamiliaFamilyIdAgendaNovoRoute
+  '/familia/$familyId/documentos/novo': typeof FamiliaFamilyIdDocumentosNovoRoute
+  '/familia/$familyId/medicamentos/novo': typeof FamiliaFamilyIdMedicamentosNovoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/login' | '/onboarding' | '/register'
+  fullPaths:
+    | '/'
+    | '/agenda'
+    | '/dashboard'
+    | '/documentos'
+    | '/familia'
+    | '/login'
+    | '/onboarding'
+    | '/perfil'
+    | '/register'
+    | '/familia/$familyId/medicamentos'
+    | '/familia/$familyId/agenda/novo'
+    | '/familia/$familyId/documentos/novo'
+    | '/familia/$familyId/medicamentos/novo'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/login' | '/onboarding' | '/register'
-  id: '__root__' | '/' | '/dashboard' | '/login' | '/onboarding' | '/register'
+  to:
+    | '/'
+    | '/agenda'
+    | '/dashboard'
+    | '/documentos'
+    | '/familia'
+    | '/login'
+    | '/onboarding'
+    | '/perfil'
+    | '/register'
+    | '/familia/$familyId/medicamentos'
+    | '/familia/$familyId/agenda/novo'
+    | '/familia/$familyId/documentos/novo'
+    | '/familia/$familyId/medicamentos/novo'
+  id:
+    | '__root__'
+    | '/'
+    | '/agenda'
+    | '/dashboard'
+    | '/documentos'
+    | '/familia'
+    | '/login'
+    | '/onboarding'
+    | '/perfil'
+    | '/register'
+    | '/familia/$familyId/medicamentos'
+    | '/familia/$familyId/agenda/novo'
+    | '/familia/$familyId/documentos/novo'
+    | '/familia/$familyId/medicamentos/novo'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AgendaRoute: typeof AgendaRoute
   DashboardRoute: typeof DashboardRoute
+  DocumentosRoute: typeof DocumentosRoute
+  FamiliaRoute: typeof FamiliaRouteWithChildren
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
+  PerfilRoute: typeof PerfilRoute
   RegisterRoute: typeof RegisterRoute
 }
 
@@ -86,6 +206,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfil': {
+      id: '/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof PerfilRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -102,11 +229,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/familia': {
+      id: '/familia'
+      path: '/familia'
+      fullPath: '/familia'
+      preLoaderRoute: typeof FamiliaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documentos': {
+      id: '/documentos'
+      path: '/documentos'
+      fullPath: '/documentos'
+      preLoaderRoute: typeof DocumentosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agenda': {
+      id: '/agenda'
+      path: '/agenda'
+      fullPath: '/agenda'
+      preLoaderRoute: typeof AgendaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -116,14 +264,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/familia/$familyId/medicamentos': {
+      id: '/familia/$familyId/medicamentos'
+      path: '/$familyId/medicamentos'
+      fullPath: '/familia/$familyId/medicamentos'
+      preLoaderRoute: typeof FamiliaFamilyIdMedicamentosRouteImport
+      parentRoute: typeof FamiliaRoute
+    }
+    '/familia/$familyId/medicamentos/novo': {
+      id: '/familia/$familyId/medicamentos/novo'
+      path: '/novo'
+      fullPath: '/familia/$familyId/medicamentos/novo'
+      preLoaderRoute: typeof FamiliaFamilyIdMedicamentosNovoRouteImport
+      parentRoute: typeof FamiliaFamilyIdMedicamentosRoute
+    }
+    '/familia/$familyId/documentos/novo': {
+      id: '/familia/$familyId/documentos/novo'
+      path: '/$familyId/documentos/novo'
+      fullPath: '/familia/$familyId/documentos/novo'
+      preLoaderRoute: typeof FamiliaFamilyIdDocumentosNovoRouteImport
+      parentRoute: typeof FamiliaRoute
+    }
+    '/familia/$familyId/agenda/novo': {
+      id: '/familia/$familyId/agenda/novo'
+      path: '/$familyId/agenda/novo'
+      fullPath: '/familia/$familyId/agenda/novo'
+      preLoaderRoute: typeof FamiliaFamilyIdAgendaNovoRouteImport
+      parentRoute: typeof FamiliaRoute
+    }
   }
 }
 
+interface FamiliaFamilyIdMedicamentosRouteChildren {
+  FamiliaFamilyIdMedicamentosNovoRoute: typeof FamiliaFamilyIdMedicamentosNovoRoute
+}
+
+const FamiliaFamilyIdMedicamentosRouteChildren: FamiliaFamilyIdMedicamentosRouteChildren =
+  {
+    FamiliaFamilyIdMedicamentosNovoRoute: FamiliaFamilyIdMedicamentosNovoRoute,
+  }
+
+const FamiliaFamilyIdMedicamentosRouteWithChildren =
+  FamiliaFamilyIdMedicamentosRoute._addFileChildren(
+    FamiliaFamilyIdMedicamentosRouteChildren,
+  )
+
+interface FamiliaRouteChildren {
+  FamiliaFamilyIdMedicamentosRoute: typeof FamiliaFamilyIdMedicamentosRouteWithChildren
+  FamiliaFamilyIdAgendaNovoRoute: typeof FamiliaFamilyIdAgendaNovoRoute
+  FamiliaFamilyIdDocumentosNovoRoute: typeof FamiliaFamilyIdDocumentosNovoRoute
+}
+
+const FamiliaRouteChildren: FamiliaRouteChildren = {
+  FamiliaFamilyIdMedicamentosRoute:
+    FamiliaFamilyIdMedicamentosRouteWithChildren,
+  FamiliaFamilyIdAgendaNovoRoute: FamiliaFamilyIdAgendaNovoRoute,
+  FamiliaFamilyIdDocumentosNovoRoute: FamiliaFamilyIdDocumentosNovoRoute,
+}
+
+const FamiliaRouteWithChildren =
+  FamiliaRoute._addFileChildren(FamiliaRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AgendaRoute: AgendaRoute,
   DashboardRoute: DashboardRoute,
+  DocumentosRoute: DocumentosRoute,
+  FamiliaRoute: FamiliaRouteWithChildren,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
+  PerfilRoute: PerfilRoute,
   RegisterRoute: RegisterRoute,
 }
 export const routeTree = rootRouteImport
