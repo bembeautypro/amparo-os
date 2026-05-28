@@ -131,17 +131,26 @@ function FamilyPage() {
 
                 <div className="mt-5 flex flex-wrap gap-2">
                   <Button asChild size="sm" variant="secondary" className="gap-1.5">
-                    <Link to={`/familia/${activeFamily.id}/medicamentos`}>
+                    <Link
+                      to="/familia/$familyId/medicamentos"
+                      params={{ familyId: activeFamily.id }}
+                    >
                       <Pill className="h-3.5 w-3.5" /> Medicamentos
                     </Link>
                   </Button>
                   <Button asChild size="sm" variant="secondary" className="gap-1.5">
-                    <Link to={`/familia/${activeFamily.id}/agenda/novo`}>
+                    <Link
+                      to="/familia/$familyId/agenda/novo"
+                      params={{ familyId: activeFamily.id }}
+                    >
                       <Plus className="h-3.5 w-3.5" /> Consulta
                     </Link>
                   </Button>
                   <Button asChild size="sm" variant="secondary" className="gap-1.5">
-                    <Link to={`/familia/${activeFamily.id}/documentos/novo`}>
+                    <Link
+                      to="/familia/$familyId/documentos/novo"
+                      params={{ familyId: activeFamily.id }}
+                    >
                       <Plus className="h-3.5 w-3.5" /> Documento
                     </Link>
                   </Button>
