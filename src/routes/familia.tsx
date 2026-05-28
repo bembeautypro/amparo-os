@@ -49,13 +49,19 @@ function FamilyPage() {
     },
   });
 
+  const OnboardingBtn = (
+    <Button asChild className="h-11">
+      <Link to="/onboarding">Iniciar onboarding</Link>
+    </Button>
+  );
+
   if (!activeFamily) {
     return (
       <EmptyState
         icon={Users}
         title="Crie sua família"
         description="Comece adicionando familiares para organizar a saúde de todos juntos."
-        action={{ label: "Iniciar onboarding", to: "/onboarding" }}
+        action={OnboardingBtn}
       />
     );
   }
@@ -72,7 +78,7 @@ function FamilyPage() {
           icon={Users}
           title="Nenhum familiar cadastrado"
           description="Adicione um familiar para começar a registrar medicamentos, consultas e documentos."
-          action={{ label: "Adicionar familiar", to: "/onboarding" }}
+          action={OnboardingBtn}
         />
       ) : (
         <div className="grid gap-4 md:grid-cols-2">

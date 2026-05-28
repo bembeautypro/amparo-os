@@ -55,7 +55,10 @@ function MedicationsPage() {
         }
         action={
           <Button asChild className="h-11 gap-2">
-            <Link to={newHref}>
+            <Link
+              to="/familia/$familyId/medicamentos/novo"
+              params={{ familyId }}
+            >
               <Plus className="h-4 w-4" /> Adicionar
             </Link>
           </Button>
@@ -69,7 +72,16 @@ function MedicationsPage() {
           icon={Pill}
           title="Nenhum medicamento cadastrado"
           description="Registre os medicamentos em uso para nunca esquecer uma dose."
-          action={{ label: "Adicionar medicamento", to: newHref }}
+          action={
+            <Button asChild className="h-11">
+              <Link
+                to="/familia/$familyId/medicamentos/novo"
+                params={{ familyId }}
+              >
+                Adicionar medicamento
+              </Link>
+            </Button>
+          }
         />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">

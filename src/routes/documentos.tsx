@@ -59,6 +59,18 @@ function DocumentsPage() {
     window.open(data.signedUrl, "_blank");
   }
 
+  const NewBtn = ({ label }: { label: string }) =>
+    activeFamily ? (
+      <Button asChild className="h-11 gap-2">
+        <Link
+          to="/familia/$familyId/documentos/novo"
+          params={{ familyId: activeFamily.id }}
+        >
+          <Plus className="h-4 w-4" /> {label}
+        </Link>
+      </Button>
+    ) : null;
+
   return (
     <div className="space-y-8">
       <PageHeader
@@ -68,15 +80,7 @@ function DocumentsPage() {
             ? `Receitas, exames e laudos de ${activePatient.name}.`
             : "Selecione um familiar para ver os documentos."
         }
-        action={
-          activeFamily && (
-            <Button asChild className="h-11 gap-2">
-              <Link to={newHref}>
-                <Plus className="h-4 w-4" /> Subir documento
-              </Link>
-            </Button>
-          )
-        }
+        action={<NewBtn label="Subir documento" />}
       />
 
       {isLoading ? (
@@ -86,7 +90,7 @@ function DocumentsPage() {
           icon={FileText}
           title="Nenhum documento ainda"
           description="Guarde receitas, exames e laudos digitalizados em um único lugar, acessíveis a qualquer momento."
-          action={activeFamily ? { label: "Subir documento", to: newHref } : undefined}
+          action={<NewBtn label="Subir documento" />}
         />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">

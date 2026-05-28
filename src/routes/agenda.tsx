@@ -76,18 +76,7 @@ function AgendaPage() {
           icon={CalendarDays}
           title="Nenhuma consulta agendada"
           description="Cadastre consultas, exames e retornos para receber lembretes e manter tudo organizado."
-          action={
-            activeFamily ? (
-              <Button asChild className="h-11">
-                <Link
-                  to="/familia/$familyId/agenda/novo"
-                  params={{ familyId: activeFamily.id }}
-                >
-                  Criar consulta
-                </Link>
-              </Button>
-            ) : undefined
-          }
+          action={<NewBtn label="Criar consulta" />}
         />
       ) : (
         <div className="space-y-8">
