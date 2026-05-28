@@ -1,6 +1,5 @@
-import { Link } from "@tanstack/react-router";
 import { type LucideIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { type ReactNode } from "react";
 
 export function EmptyState({
   icon: Icon,
@@ -11,7 +10,7 @@ export function EmptyState({
   icon: LucideIcon;
   title: string;
   description: string;
-  action?: { label: string; to: string };
+  action?: ReactNode;
 }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/50 px-6 py-16 text-center">
@@ -20,11 +19,7 @@ export function EmptyState({
       </span>
       <h3 className="mt-4 text-lg font-semibold tracking-tight">{title}</h3>
       <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">{description}</p>
-      {action && (
-        <Button asChild className="mt-6 h-11">
-          <Link to={action.to}>{action.label}</Link>
-        </Button>
-      )}
+      {action && <div className="mt-6">{action}</div>}
     </div>
   );
 }
@@ -36,7 +31,7 @@ export function PageHeader({
 }: {
   title: string;
   description?: string;
-  action?: React.ReactNode;
+  action?: ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
