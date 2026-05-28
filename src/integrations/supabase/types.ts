@@ -14,6 +14,90 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          created_at: string
+          doctor_name: string | null
+          id: string
+          location: string | null
+          notes: string | null
+          patient_id: string
+          scheduled_at: string
+          specialty: string | null
+          status: Database["public"]["Enums"]["appointment_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          doctor_name?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          patient_id: string
+          scheduled_at: string
+          specialty?: string | null
+          status?: Database["public"]["Enums"]["appointment_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          doctor_name?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          patient_id?: string
+          scheduled_at?: string
+          specialty?: string | null
+          status?: Database["public"]["Enums"]["appointment_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      documents: {
+        Row: {
+          created_at: string
+          doc_type: Database["public"]["Enums"]["document_type"]
+          exam_date: string | null
+          file_path: string
+          file_size: number | null
+          id: string
+          mime_type: string | null
+          notes: string | null
+          patient_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          doc_type?: Database["public"]["Enums"]["document_type"]
+          exam_date?: string | null
+          file_path: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          notes?: string | null
+          patient_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          doc_type?: Database["public"]["Enums"]["document_type"]
+          exam_date?: string | null
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          notes?: string | null
+          patient_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       emergency_contacts: {
         Row: {
           created_at: string
@@ -279,6 +363,7 @@ export type Database = {
       patient_family: { Args: { _patient_id: string }; Returns: string }
     }
     Enums: {
+      appointment_status: "scheduled" | "done" | "cancelled"
       blood_type:
         | "A+"
         | "A-"
@@ -289,6 +374,7 @@ export type Database = {
         | "O+"
         | "O-"
         | "unknown"
+      document_type: "prescription" | "exam" | "report" | "other"
       family_role: "admin" | "member" | "caregiver"
       member_relation: "child" | "spouse" | "caregiver" | "other"
       member_status: "active" | "invited"
@@ -420,7 +506,9 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      appointment_status: ["scheduled", "done", "cancelled"],
       blood_type: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "unknown"],
+      document_type: ["prescription", "exam", "report", "other"],
       family_role: ["admin", "member", "caregiver"],
       member_relation: ["child", "spouse", "caregiver", "other"],
       member_status: ["active", "invited"],
