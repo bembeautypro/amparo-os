@@ -66,7 +66,7 @@ function NewMedicationPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <Button asChild variant="ghost" size="sm" className="gap-1.5 -ml-2">
-        <Link to={`/familia/${familyId}/medicamentos`}>
+        <Link to="/familia/$familyId/medicamentos" params={{ familyId }}>
           <ArrowLeft className="h-4 w-4" /> Voltar
         </Link>
       </Button>
