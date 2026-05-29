@@ -179,6 +179,27 @@ export function StepCritical({
   );
 }
 
+function SectionDivider({ title, critical }: { title: string; critical?: boolean }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </span>
+      {critical && <CriticalBadge />}
+      <span className="h-px flex-1 bg-border" />
+    </div>
+  );
+}
+
+function maskPhoneBR(raw: string): string {
+  const d = raw.replace(/\D/g, "").slice(0, 11);
+  if (d.length === 0) return "";
+  if (d.length <= 2) return `(${d}`;
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+
 function CriticalBadge() {
   return (
     <span className="inline-flex items-center gap-1 rounded-full bg-emergency-soft px-2 py-0.5 text-[11px] font-medium text-emergency">
