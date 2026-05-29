@@ -55,7 +55,7 @@ export function StepPatient({
         if (valid)
           onSubmit({
             fullName: fullName.trim(),
-            birthDate,
+            birthDate: birthDate ? format(birthDate, "yyyy-MM-dd") : "",
             relation: relation.trim(),
             photoFile,
           });
