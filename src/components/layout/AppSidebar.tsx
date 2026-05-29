@@ -1,17 +1,26 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, CalendarDays, FileText, Users, User, Heart } from "lucide-react";
+import { Home, Pill, CalendarDays, FileText, Users, User, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const items = [
-  { to: "/dashboard", label: "Início", icon: Home },
-  { to: "/agenda", label: "Agenda", icon: CalendarDays },
-  { to: "/documentos", label: "Documentos", icon: FileText },
-  { to: "/familia", label: "Família", icon: Users },
-  { to: "/perfil", label: "Perfil", icon: User },
-] as const;
+import { useFamilyContext } from "@/contexts/FamilyContext";
 
 export function AppSidebar({ collapsed }: { collapsed: boolean }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { activeFamily } = useFamilyContext();
+  const familyId = activeFamily?.id;
+
+  const items = [
+    { to: "/dashboard", label: "Início", icon: Home, match: "/dashboard" },
+    {
+      to: familyId ? `/familia/${familyId}/medicamentos` : "/familia",
+      label: "Medicamentos",
+      icon: Pill,
+      match: "/medicamentos",
+      disabled: !familyId,
+    },
+    { to: "/agenda", label: "Agenda", icon: CalendarDays, match: "/agenda" },
+    { to: "/documentos", label: "Documentos", icon: FileText, match: "/documentos" },
+    { to: "/familia", label: "Família", icon: Users, match: "/familia" },
+  ] as const;
 
   return (
     <aside
@@ -35,10 +44,10 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
       <nav className="flex-1 px-3 py-2">
         <ul className="space-y-1">
           {items.map((item) => {
-            const active = pathname === item.to || pathname.startsWith(item.to + "/");
+            const active = pathname.includes(item.match);
             const Icon = item.icon;
             return (
-              <li key={item.to}>
+              <li key={item.label}>
                 <Link
                   to={item.to}
                   className={cn(
@@ -47,6 +56,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
                       ? "bg-primary-soft text-primary"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground",
                     collapsed && "justify-center px-0",
+                    item.disabled && "pointer-events-none opacity-40",
                   )}
                   title={collapsed ? item.label : undefined}
                 >
@@ -57,6 +67,23 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
             );
           })}
         </ul>
+
+        <div className="mt-4 border-t border-border pt-4">
+          <Link
+            to="/perfil"
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+              pathname.startsWith("/perfil")
+                ? "bg-primary-soft text-primary"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+              collapsed && "justify-center px-0",
+            )}
+            title={collapsed ? "Perfil" : undefined}
+          >
+            <User className="h-5 w-5 shrink-0" />
+            {!collapsed && <span>Perfil</span>}
+          </Link>
+        </div>
       </nav>
 
       {!collapsed && (
