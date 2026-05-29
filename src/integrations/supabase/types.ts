@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_logs: {
+        Row: {
+          accessed_at: string
+          action: string
+          emergency_link_id: string | null
+          id: string
+          ip: string | null
+          patient_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          accessed_at?: string
+          action: string
+          emergency_link_id?: string | null
+          id?: string
+          ip?: string | null
+          patient_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          accessed_at?: string
+          action?: string
+          emergency_link_id?: string | null
+          id?: string
+          ip?: string | null
+          patient_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       appointments: {
         Row: {
           address: string | null
@@ -253,6 +283,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      emergency_links: {
+        Row: {
+          access_count: number
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          last_accessed_at: string | null
+          patient_id: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          access_count?: number
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          last_accessed_at?: string | null
+          patient_id: string
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          access_count?: number
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          last_accessed_at?: string | null
+          patient_id?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       families: {
         Row: {

@@ -19,6 +19,7 @@ import { Route as DocumentosRouteImport } from './routes/documentos'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EmergenciaTokenRouteImport } from './routes/emergencia.$token'
 import { Route as FamiliaFamilyIdMedicamentosRouteImport } from './routes/familia.$familyId.medicamentos'
 import { Route as FamiliaFamilyIdHistoricoRouteImport } from './routes/familia.$familyId.historico'
 import { Route as FamiliaFamilyIdDocumentosRouteImport } from './routes/familia.$familyId.documentos'
@@ -84,6 +85,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const EmergenciaTokenRoute = EmergenciaTokenRouteImport.update({
+  id: '/$token',
+  path: '/$token',
+  getParentRoute: () => EmergenciaRoute,
 } as any)
 const FamiliaFamilyIdMedicamentosRoute =
   FamiliaFamilyIdMedicamentosRouteImport.update({
@@ -179,12 +185,13 @@ export interface FileRoutesByFullPath {
   '/agenda': typeof AgendaRoute
   '/dashboard': typeof DashboardRoute
   '/documentos': typeof DocumentosRoute
-  '/emergencia': typeof EmergenciaRoute
+  '/emergencia': typeof EmergenciaRouteWithChildren
   '/familia': typeof FamiliaRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/perfil': typeof PerfilRoute
   '/register': typeof RegisterRoute
+  '/emergencia/$token': typeof EmergenciaTokenRoute
   '/familia/$familyId/agenda': typeof FamiliaFamilyIdAgendaRouteWithChildren
   '/familia/$familyId/documentos': typeof FamiliaFamilyIdDocumentosRouteWithChildren
   '/familia/$familyId/historico': typeof FamiliaFamilyIdHistoricoRouteWithChildren
@@ -206,12 +213,13 @@ export interface FileRoutesByTo {
   '/agenda': typeof AgendaRoute
   '/dashboard': typeof DashboardRoute
   '/documentos': typeof DocumentosRoute
-  '/emergencia': typeof EmergenciaRoute
+  '/emergencia': typeof EmergenciaRouteWithChildren
   '/familia': typeof FamiliaRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/perfil': typeof PerfilRoute
   '/register': typeof RegisterRoute
+  '/emergencia/$token': typeof EmergenciaTokenRoute
   '/familia/$familyId/agenda': typeof FamiliaFamilyIdAgendaRouteWithChildren
   '/familia/$familyId/documentos': typeof FamiliaFamilyIdDocumentosRouteWithChildren
   '/familia/$familyId/historico': typeof FamiliaFamilyIdHistoricoRouteWithChildren
@@ -234,12 +242,13 @@ export interface FileRoutesById {
   '/agenda': typeof AgendaRoute
   '/dashboard': typeof DashboardRoute
   '/documentos': typeof DocumentosRoute
-  '/emergencia': typeof EmergenciaRoute
+  '/emergencia': typeof EmergenciaRouteWithChildren
   '/familia': typeof FamiliaRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/perfil': typeof PerfilRoute
   '/register': typeof RegisterRoute
+  '/emergencia/$token': typeof EmergenciaTokenRoute
   '/familia/$familyId/agenda': typeof FamiliaFamilyIdAgendaRouteWithChildren
   '/familia/$familyId/documentos': typeof FamiliaFamilyIdDocumentosRouteWithChildren
   '/familia/$familyId/historico': typeof FamiliaFamilyIdHistoricoRouteWithChildren
@@ -269,6 +278,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/perfil'
     | '/register'
+    | '/emergencia/$token'
     | '/familia/$familyId/agenda'
     | '/familia/$familyId/documentos'
     | '/familia/$familyId/historico'
@@ -296,6 +306,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/perfil'
     | '/register'
+    | '/emergencia/$token'
     | '/familia/$familyId/agenda'
     | '/familia/$familyId/documentos'
     | '/familia/$familyId/historico'
@@ -323,6 +334,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/perfil'
     | '/register'
+    | '/emergencia/$token'
     | '/familia/$familyId/agenda'
     | '/familia/$familyId/documentos'
     | '/familia/$familyId/historico'
@@ -345,7 +357,7 @@ export interface RootRouteChildren {
   AgendaRoute: typeof AgendaRoute
   DashboardRoute: typeof DashboardRoute
   DocumentosRoute: typeof DocumentosRoute
-  EmergenciaRoute: typeof EmergenciaRoute
+  EmergenciaRoute: typeof EmergenciaRouteWithChildren
   FamiliaRoute: typeof FamiliaRouteWithChildren
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
@@ -424,6 +436,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/emergencia/$token': {
+      id: '/emergencia/$token'
+      path: '/$token'
+      fullPath: '/emergencia/$token'
+      preLoaderRoute: typeof EmergenciaTokenRouteImport
+      parentRoute: typeof EmergenciaRoute
     }
     '/familia/$familyId/medicamentos': {
       id: '/familia/$familyId/medicamentos'
@@ -532,6 +551,18 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface EmergenciaRouteChildren {
+  EmergenciaTokenRoute: typeof EmergenciaTokenRoute
+}
+
+const EmergenciaRouteChildren: EmergenciaRouteChildren = {
+  EmergenciaTokenRoute: EmergenciaTokenRoute,
+}
+
+const EmergenciaRouteWithChildren = EmergenciaRoute._addFileChildren(
+  EmergenciaRouteChildren,
+)
 
 interface FamiliaFamilyIdAgendaIdRouteChildren {
   FamiliaFamilyIdAgendaIdEditarRoute: typeof FamiliaFamilyIdAgendaIdEditarRoute
@@ -665,7 +696,7 @@ const rootRouteChildren: RootRouteChildren = {
   AgendaRoute: AgendaRoute,
   DashboardRoute: DashboardRoute,
   DocumentosRoute: DocumentosRoute,
-  EmergenciaRoute: EmergenciaRoute,
+  EmergenciaRoute: EmergenciaRouteWithChildren,
   FamiliaRoute: FamiliaRouteWithChildren,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,

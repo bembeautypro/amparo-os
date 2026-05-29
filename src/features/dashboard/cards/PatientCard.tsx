@@ -1,4 +1,5 @@
-import { Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { EmergencyModal } from "@/features/emergency/EmergencyModal";
 import { Siren } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -93,15 +94,24 @@ export function PatientCard({ patientId }: { patientId: string }) {
         </div>
       ) : null}
 
+      <EmergencyTrigger patientId={patientId} />
+    </Card>
+  );
+}
+
+function EmergencyTrigger({ patientId }: { patientId: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
       <Button
-        asChild
         size="lg"
         className="mt-6 h-12 w-full bg-emergency text-emergency-foreground hover:bg-emergency/90"
+        onClick={() => setOpen(true)}
+        aria-label="Abrir painel de emergência"
       >
-        <Link to="/emergencia" aria-label="Acessar painel de emergência">
-          <Siren className="mr-2 h-5 w-5" /> Emergência
-        </Link>
+        <Siren className="mr-2 h-5 w-5" /> Emergência
       </Button>
-    </Card>
+      <EmergencyModal patientId={patientId} open={open} onOpenChange={setOpen} />
+    </>
   );
 }
