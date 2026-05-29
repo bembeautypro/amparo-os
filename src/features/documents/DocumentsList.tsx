@@ -27,6 +27,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { EmptyState } from "@/components/ui-extras";
+import { DocsEmpty } from "@/components/illustrations/EmptyIllustrations";
 import { cn } from "@/lib/utils";
 import { fetchDocuments, getSignedDocUrl } from "./api";
 import { DOC_TYPES, DOC_TYPE_LABEL, DOC_TYPE_EMOJI, type DocumentType, type DocumentFilters, type Document } from "./types";
@@ -189,13 +190,13 @@ export function DocumentsList({ familyId, patientId }: Props) {
         <p className="text-sm text-muted-foreground">Carregando…</p>
       ) : docs.length === 0 ? (
         <EmptyState
-          icon={FileText}
-          title="Nenhum documento encontrado"
+          illustration={<DocsEmpty />}
+          title="Sua biblioteca está vazia. Suba o primeiro documento."
           description="Guarde receitas, exames, laudos e carteirinhas em um lugar só."
           action={
-            <Button asChild>
+            <Button asChild className="h-11">
               <Link to="/familia/$familyId/documentos/novo" params={{ familyId }}>
-                <Plus className="mr-1 h-4 w-4" /> Subir documento
+                <Plus className="mr-1 h-4 w-4" /> Subir agora
               </Link>
             </Button>
           }

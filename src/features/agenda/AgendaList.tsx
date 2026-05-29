@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState } from "@/components/ui-extras";
+import { CalendarEmpty } from "@/components/illustrations/EmptyIllustrations";
 import { cn } from "@/lib/utils";
 import { fetchAppointments } from "./api";
 import {
@@ -123,13 +124,13 @@ export function AgendaList({ familyId, patientId }: Props) {
         <p className="text-sm text-muted-foreground">Carregando…</p>
       ) : items.length === 0 ? (
         <EmptyState
-          icon={CalendarDays}
-          title="Nenhum compromisso"
+          illustration={<CalendarEmpty />}
+          title="Nenhuma consulta agendada."
           description="Cadastre consultas, exames e retornos para receber lembretes."
           action={
-            <Button asChild>
+            <Button asChild className="h-11">
               <Link to="/familia/$familyId/agenda/novo" params={{ familyId }}>
-                <Plus className="h-4 w-4" /> Novo
+                <Plus className="h-4 w-4" /> Agendar consulta
               </Link>
             </Button>
           }
