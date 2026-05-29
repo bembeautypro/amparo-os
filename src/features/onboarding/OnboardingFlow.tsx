@@ -16,6 +16,7 @@ const TOTAL_STEPS = 5;
 
 export function OnboardingFlow() {
   const { user } = useAuth();
+  const { setActiveFamily, setActivePatient } = useFamilyContext();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
