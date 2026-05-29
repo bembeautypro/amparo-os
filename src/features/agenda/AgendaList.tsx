@@ -284,6 +284,7 @@ function CalendarView({
           variant="ghost"
           size="icon"
           onClick={() => setMonth(subMonths(month, 1))}
+          aria-label="Mês anterior"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
@@ -294,6 +295,7 @@ function CalendarView({
           variant="ghost"
           size="icon"
           onClick={() => setMonth(addMonths(month, 1))}
+          aria-label="Próximo mês"
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
