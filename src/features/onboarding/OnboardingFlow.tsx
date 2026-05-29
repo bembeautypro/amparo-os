@@ -95,8 +95,9 @@ export function OnboardingFlow() {
       setActivePatient({
         id: pat.id,
         family_id: familyId,
-        full_name: data.fullName,
-        photo_url: photoUrl,
+        name: data.fullName,
+        relation: data.relation || null,
+        avatarUrl: photoUrl,
       });
       setStep(4);
     } catch (err: any) {
