@@ -22,6 +22,7 @@ export type Database = {
           location: string | null
           notes: string | null
           patient_id: string
+          responsible_user_id: string | null
           scheduled_at: string
           specialty: string | null
           status: Database["public"]["Enums"]["appointment_status"]
@@ -35,6 +36,7 @@ export type Database = {
           location?: string | null
           notes?: string | null
           patient_id: string
+          responsible_user_id?: string | null
           scheduled_at: string
           specialty?: string | null
           status?: Database["public"]["Enums"]["appointment_status"]
@@ -48,6 +50,7 @@ export type Database = {
           location?: string | null
           notes?: string | null
           patient_id?: string
+          responsible_user_id?: string | null
           scheduled_at?: string
           specialty?: string | null
           status?: Database["public"]["Enums"]["appointment_status"]
@@ -198,6 +201,36 @@ export type Database = {
           },
         ]
       }
+      medication_logs: {
+        Row: {
+          created_at: string
+          id: string
+          medication_id: string
+          patient_id: string
+          scheduled_for: string
+          taken_at: string | null
+          taken_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          medication_id: string
+          patient_id: string
+          scheduled_for: string
+          taken_at?: string | null
+          taken_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          medication_id?: string
+          patient_id?: string
+          scheduled_for?: string
+          taken_at?: string | null
+          taken_by?: string | null
+        }
+        Relationships: []
+      }
       medications: {
         Row: {
           created_at: string
@@ -207,6 +240,8 @@ export type Database = {
           name: string
           notes: string | null
           patient_id: string
+          schedule: Json | null
+          status: Database["public"]["Enums"]["medication_status"]
           updated_at: string
         }
         Insert: {
@@ -217,6 +252,8 @@ export type Database = {
           name: string
           notes?: string | null
           patient_id: string
+          schedule?: Json | null
+          status?: Database["public"]["Enums"]["medication_status"]
           updated_at?: string
         }
         Update: {
@@ -227,6 +264,8 @@ export type Database = {
           name?: string
           notes?: string | null
           patient_id?: string
+          schedule?: Json | null
+          status?: Database["public"]["Enums"]["medication_status"]
           updated_at?: string
         }
         Relationships: [
@@ -375,6 +414,7 @@ export type Database = {
       condition_status: "active" | "inactive"
       document_type: "prescription" | "exam" | "report" | "other"
       family_role: "admin" | "member" | "caregiver"
+      medication_status: "active" | "paused" | "archived"
       member_relation: "child" | "spouse" | "caregiver" | "other"
       member_status: "active" | "invited"
       severity_level: "low" | "medium" | "high"
@@ -510,6 +550,7 @@ export const Constants = {
       condition_status: ["active", "inactive"],
       document_type: ["prescription", "exam", "report", "other"],
       family_role: ["admin", "member", "caregiver"],
+      medication_status: ["active", "paused", "archived"],
       member_relation: ["child", "spouse", "caregiver", "other"],
       member_status: ["active", "invited"],
       severity_level: ["low", "medium", "high"],
