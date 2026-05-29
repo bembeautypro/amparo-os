@@ -16,51 +16,119 @@ export type Database = {
     Tables: {
       appointments: {
         Row: {
+          address: string | null
           created_at: string
           doctor_name: string | null
           id: string
           location: string | null
+          map_url: string | null
           notes: string | null
+          parent_appointment_id: string | null
           patient_id: string
           responsible_user_id: string | null
           scheduled_at: string
           specialty: string | null
           status: Database["public"]["Enums"]["appointment_status"]
           title: string
+          type: Database["public"]["Enums"]["appointment_type"]
           updated_at: string
         }
         Insert: {
+          address?: string | null
           created_at?: string
           doctor_name?: string | null
           id?: string
           location?: string | null
+          map_url?: string | null
           notes?: string | null
+          parent_appointment_id?: string | null
           patient_id: string
           responsible_user_id?: string | null
           scheduled_at: string
           specialty?: string | null
           status?: Database["public"]["Enums"]["appointment_status"]
           title: string
+          type?: Database["public"]["Enums"]["appointment_type"]
           updated_at?: string
         }
         Update: {
+          address?: string | null
           created_at?: string
           doctor_name?: string | null
           id?: string
           location?: string | null
+          map_url?: string | null
           notes?: string | null
+          parent_appointment_id?: string | null
           patient_id?: string
           responsible_user_id?: string | null
           scheduled_at?: string
           specialty?: string | null
           status?: Database["public"]["Enums"]["appointment_status"]
           title?: string
+          type?: Database["public"]["Enums"]["appointment_type"]
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "appointments_parent_appointment_id_fkey"
+            columns: ["parent_appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clinical_events: {
+        Row: {
+          appointment_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          event_date: string
+          id: string
+          patient_id: string
+          title: string
+          type: Database["public"]["Enums"]["clinical_event_type"]
+          updated_at: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          event_date?: string
+          id?: string
+          patient_id: string
+          title: string
+          type?: Database["public"]["Enums"]["clinical_event_type"]
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          event_date?: string
+          id?: string
+          patient_id?: string
+          title?: string
+          type?: Database["public"]["Enums"]["clinical_event_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clinical_events_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       documents: {
         Row: {
+          appointment_id: string | null
           created_at: string
           doc_type: Database["public"]["Enums"]["document_type"]
           exam_date: string | null
@@ -74,6 +142,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          appointment_id?: string | null
           created_at?: string
           doc_type?: Database["public"]["Enums"]["document_type"]
           exam_date?: string | null
@@ -87,6 +156,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          appointment_id?: string | null
           created_at?: string
           doc_type?: Database["public"]["Enums"]["document_type"]
           exam_date?: string | null
@@ -99,7 +169,15 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "documents_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       emergency_contacts: {
         Row: {
@@ -463,6 +541,14 @@ export type Database = {
     }
     Enums: {
       appointment_status: "scheduled" | "done" | "cancelled"
+      appointment_type:
+        | "consulta"
+        | "exame"
+        | "retorno"
+        | "procedimento"
+        | "fisioterapia"
+        | "vacina"
+        | "outro"
       blood_type:
         | "A+"
         | "A-"
@@ -473,6 +559,14 @@ export type Database = {
         | "O+"
         | "O-"
         | "unknown"
+      clinical_event_type:
+        | "consultation"
+        | "exam_result"
+        | "procedure"
+        | "hospitalization"
+        | "diagnosis"
+        | "vaccination"
+        | "other"
       condition_status: "active" | "inactive"
       document_type: "prescription" | "exam" | "report" | "other"
       family_role: "admin" | "member" | "caregiver"
@@ -608,7 +702,25 @@ export const Constants = {
   public: {
     Enums: {
       appointment_status: ["scheduled", "done", "cancelled"],
+      appointment_type: [
+        "consulta",
+        "exame",
+        "retorno",
+        "procedimento",
+        "fisioterapia",
+        "vacina",
+        "outro",
+      ],
       blood_type: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "unknown"],
+      clinical_event_type: [
+        "consultation",
+        "exam_result",
+        "procedure",
+        "hospitalization",
+        "diagnosis",
+        "vaccination",
+        "other",
+      ],
       condition_status: ["active", "inactive"],
       document_type: ["prescription", "exam", "report", "other"],
       family_role: ["admin", "member", "caregiver"],
