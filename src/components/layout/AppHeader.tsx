@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Menu, ChevronDown, Check, Plus } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { PatientAvatarImage } from "@/components/PatientAvatarImage";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
