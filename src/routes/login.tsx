@@ -29,6 +29,7 @@ function GoogleIcon() {
 function LoginPage() {
   const { signIn, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
+  const { invite } = Route.useSearch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -48,7 +49,11 @@ function LoginPage() {
       return;
     }
     toast.success("Bem-vindo de volta!");
-    navigate({ to: "/dashboard" });
+    if (invite) {
+      navigate({ to: "/convite/$token", params: { token: invite } });
+    } else {
+      navigate({ to: "/dashboard" });
+    }
   }
 
   async function handleGoogle() {
