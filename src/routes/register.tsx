@@ -18,6 +18,7 @@ export const Route = createFileRoute("/register")({
 function RegisterPage() {
   const { signUp } = useAuth();
   const navigate = useNavigate();
+  const { invite } = Route.useSearch();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -41,7 +42,11 @@ function RegisterPage() {
       return;
     }
     toast.success("Conta criada! Confira seu email para confirmar.");
-    navigate({ to: "/login" });
+    if (invite) {
+      navigate({ to: "/login", search: { invite } });
+    } else {
+      navigate({ to: "/login" });
+    }
   }
 
   return (
