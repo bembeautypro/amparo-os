@@ -138,7 +138,11 @@ export function OnboardingFlow() {
 
       if (data.conditions.length) {
         const { error } = await supabase.from("patient_conditions").insert(
-          data.conditions.map((name) => ({ patient_id: patientId, name })),
+          data.conditions.map((name) => ({
+            patient_id: patientId,
+            name,
+            status: "active" as const,
+          })),
         );
         if (error) throw error;
       }
@@ -148,6 +152,7 @@ export function OnboardingFlow() {
           patient_id: patientId,
           name: data.emergencyName.trim(),
           phone: data.emergencyPhone.trim(),
+          priority: 1,
         });
         if (error) throw error;
       }
