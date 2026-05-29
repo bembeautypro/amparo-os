@@ -107,7 +107,7 @@ export async function logActivity(familyId: string, action: string, details?: Re
     family_id: familyId,
     actor_user_id: auth.user.id,
     action,
-    details: details ?? null,
+    details: (details ?? null) as never,
   });
 }
 
