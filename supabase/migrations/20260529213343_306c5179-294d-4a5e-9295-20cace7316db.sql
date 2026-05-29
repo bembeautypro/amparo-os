@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.is_family_creator(uuid, uuid) FROM PUBLIC, anon, authenticated;

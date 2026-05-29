@@ -356,6 +356,10 @@ export type Database = {
         Args: { _family_id: string; _user_id: string }
         Returns: boolean
       }
+      is_family_creator: {
+        Args: { _family_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_family_member: {
         Args: { _family_id: string; _user_id: string }
         Returns: boolean
