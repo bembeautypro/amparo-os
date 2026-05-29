@@ -91,7 +91,7 @@ function FamilyPage() {
               >
                 <div className="flex items-center gap-4">
                   <Avatar className="h-14 w-14">
-                    {p.avatarUrl && <AvatarImage src={p.avatarUrl} alt={p.name} />}
+                    <PatientAvatarImage path={p.avatarUrl} alt={p.name} />
                     <AvatarFallback className="bg-primary-soft text-primary text-base font-semibold">
                       {p.name
                         .split(" ")
