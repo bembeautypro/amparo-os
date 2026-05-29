@@ -85,9 +85,9 @@ const IndexRoute = IndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmergenciaTokenRoute = EmergenciaTokenRouteImport.update({
-  id: '/$token',
-  path: '/$token',
-  getParentRoute: () => EmergenciaRoute,
+  id: '/emergencia/$token',
+  path: '/emergencia/$token',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ConviteTokenRoute = ConviteTokenRouteImport.update({
   id: '/convite/$token',
@@ -401,6 +401,7 @@ export interface RootRouteChildren {
   PerfilRoute: typeof PerfilRoute
   RegisterRoute: typeof RegisterRoute
   ConviteTokenRoute: typeof ConviteTokenRoute
+  EmergenciaTokenRoute: typeof EmergenciaTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -470,10 +471,10 @@ declare module '@tanstack/react-router' {
     }
     '/emergencia/$token': {
       id: '/emergencia/$token'
-      path: '/$token'
+      path: '/emergencia/$token'
       fullPath: '/emergencia/$token'
       preLoaderRoute: typeof EmergenciaTokenRouteImport
-      parentRoute: typeof EmergenciaRoute
+      parentRoute: typeof rootRouteImport
     }
     '/convite/$token': {
       id: '/convite/$token'
@@ -768,17 +769,8 @@ const rootRouteChildren: RootRouteChildren = {
   PerfilRoute: PerfilRoute,
   RegisterRoute: RegisterRoute,
   ConviteTokenRoute: ConviteTokenRoute,
+  EmergenciaTokenRoute: EmergenciaTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
