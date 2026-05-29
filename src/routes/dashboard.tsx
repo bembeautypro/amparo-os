@@ -345,8 +345,7 @@ function StatCard({
   );
   if (!to) return inner;
   return (
-    // @ts-expect-error dynamic to/params
-    <Link to={to} params={params} className="block">
+    <Link to={to as never} params={params as never} className="block">
       {inner}
     </Link>
   );
