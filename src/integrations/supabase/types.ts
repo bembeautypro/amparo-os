@@ -629,6 +629,7 @@ export type Database = {
       patient_conditions: {
         Row: {
           created_at: string
+          diagnosed_at: string | null
           id: string
           name: string
           patient_id: string
@@ -636,6 +637,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          diagnosed_at?: string | null
           id?: string
           name: string
           patient_id: string
@@ -643,6 +645,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          diagnosed_at?: string | null
           id?: string
           name?: string
           patient_id?: string
@@ -663,40 +666,55 @@ export type Database = {
           birth_date: string | null
           blood_type: Database["public"]["Enums"]["blood_type"] | null
           created_at: string
+          critical_notes: string | null
           family_id: string
           full_name: string
+          height_cm: number | null
           id: string
           insurance_name: string | null
           insurance_number: string | null
           photo_url: string | null
+          preferred_hospital: string | null
+          primary_doctor: string | null
           relation: string | null
           updated_at: string
+          weight_kg: number | null
         }
         Insert: {
           birth_date?: string | null
           blood_type?: Database["public"]["Enums"]["blood_type"] | null
           created_at?: string
+          critical_notes?: string | null
           family_id: string
           full_name: string
+          height_cm?: number | null
           id?: string
           insurance_name?: string | null
           insurance_number?: string | null
           photo_url?: string | null
+          preferred_hospital?: string | null
+          primary_doctor?: string | null
           relation?: string | null
           updated_at?: string
+          weight_kg?: number | null
         }
         Update: {
           birth_date?: string | null
           blood_type?: Database["public"]["Enums"]["blood_type"] | null
           created_at?: string
+          critical_notes?: string | null
           family_id?: string
           full_name?: string
+          height_cm?: number | null
           id?: string
           insurance_name?: string | null
           insurance_number?: string | null
           photo_url?: string | null
+          preferred_hospital?: string | null
+          primary_doctor?: string | null
           relation?: string | null
           updated_at?: string
+          weight_kg?: number | null
         }
         Relationships: [
           {
@@ -797,7 +815,7 @@ export type Database = {
       medication_status: "active" | "paused" | "archived" | "ended"
       member_relation: "child" | "spouse" | "caregiver" | "other"
       member_status: "active" | "invited"
-      severity_level: "low" | "medium" | "high"
+      severity_level: "low" | "medium" | "high" | "critical"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -977,7 +995,7 @@ export const Constants = {
       medication_status: ["active", "paused", "archived", "ended"],
       member_relation: ["child", "spouse", "caregiver", "other"],
       member_status: ["active", "invited"],
-      severity_level: ["low", "medium", "high"],
+      severity_level: ["low", "medium", "high", "critical"],
     },
   },
 } as const
