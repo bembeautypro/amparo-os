@@ -140,14 +140,20 @@ export type Database = {
           appointment_id: string | null
           clinical_event_id: string | null
           created_at: string
+          deleted_at: string | null
           doc_type: Database["public"]["Enums"]["document_type"]
+          doctor_name: string | null
+          document_date: string | null
           exam_date: string | null
+          expiry_date: string | null
           file_path: string
           file_size: number | null
           id: string
+          institution: string | null
           mime_type: string | null
           notes: string | null
           patient_id: string
+          tags: string[]
           title: string
           updated_at: string
         }
@@ -155,14 +161,20 @@ export type Database = {
           appointment_id?: string | null
           clinical_event_id?: string | null
           created_at?: string
+          deleted_at?: string | null
           doc_type?: Database["public"]["Enums"]["document_type"]
+          doctor_name?: string | null
+          document_date?: string | null
           exam_date?: string | null
+          expiry_date?: string | null
           file_path: string
           file_size?: number | null
           id?: string
+          institution?: string | null
           mime_type?: string | null
           notes?: string | null
           patient_id: string
+          tags?: string[]
           title: string
           updated_at?: string
         }
@@ -170,14 +182,20 @@ export type Database = {
           appointment_id?: string | null
           clinical_event_id?: string | null
           created_at?: string
+          deleted_at?: string | null
           doc_type?: Database["public"]["Enums"]["document_type"]
+          doctor_name?: string | null
+          document_date?: string | null
           exam_date?: string | null
+          expiry_date?: string | null
           file_path?: string
           file_size?: number | null
           id?: string
+          institution?: string | null
           mime_type?: string | null
           notes?: string | null
           patient_id?: string
+          tags?: string[]
           title?: string
           updated_at?: string
         }
