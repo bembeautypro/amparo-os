@@ -352,19 +352,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      is_family_admin: {
-        Args: { _family_id: string; _user_id: string }
-        Returns: boolean
-      }
-      is_family_creator: {
-        Args: { _family_id: string; _user_id: string }
-        Returns: boolean
-      }
-      is_family_member: {
-        Args: { _family_id: string; _user_id: string }
-        Returns: boolean
-      }
-      patient_family: { Args: { _patient_id: string }; Returns: string }
+      [_ in never]: never
     }
     Enums: {
       appointment_status: "scheduled" | "done" | "cancelled"

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { FamilyProvider } from "@/contexts/FamilyContext";
 import { OnboardingFlow } from "@/features/onboarding/OnboardingFlow";
 
 export const Route = createFileRoute("/onboarding")({
@@ -9,7 +10,9 @@ export const Route = createFileRoute("/onboarding")({
 function OnboardingPage() {
   return (
     <ProtectedRoute>
-      <OnboardingFlow />
+      <FamilyProvider>
+        <OnboardingFlow />
+      </FamilyProvider>
     </ProtectedRoute>
   );
 }
