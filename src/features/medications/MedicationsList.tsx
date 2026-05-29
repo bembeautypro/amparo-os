@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState, PageHeader } from "@/components/ui-extras";
+import { PillsEmpty } from "@/components/illustrations/EmptyIllustrations";
 
 import { fetchMedications } from "./api";
 import { MedicationCard } from "./MedicationCard";
