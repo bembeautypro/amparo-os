@@ -29,7 +29,7 @@ export function StepPatient({
   loading: boolean;
 }) {
   const [fullName, setFullName] = useState("");
-  const [birthDate, setBirthDate] = useState("");
+  const [birthDate, setBirthDate] = useState<Date | undefined>(undefined);
   const [relation, setRelation] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
