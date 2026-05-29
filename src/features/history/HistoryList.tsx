@@ -19,6 +19,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { EmptyState } from "@/components/ui-extras";
+import { HistoryEmpty } from "@/components/illustrations/EmptyIllustrations";
 import { cn } from "@/lib/utils";
 import {
   fetchClinicalEvents,
@@ -193,16 +194,16 @@ export function HistoryList({ familyId, patientId }: Props) {
         <p className="text-sm text-muted-foreground">Carregando…</p>
       ) : events.length === 0 ? (
         <EmptyState
-          icon={Search}
-          title="Nenhum evento encontrado"
+          illustration={<HistoryEmpty />}
+          title="Nenhum evento clínico registrado."
           description="Registre consultas, exames, crises ou observações para construir o histórico."
           action={
-            <Button asChild>
+            <Button asChild className="h-11">
               <Link
                 to="/familia/$familyId/historico/novo"
                 params={{ familyId }}
               >
-                <Plus className="h-4 w-4" /> Novo evento
+                <Plus className="h-4 w-4" /> Registrar primeiro evento
               </Link>
             </Button>
           }

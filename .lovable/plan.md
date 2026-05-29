@@ -1,129 +1,106 @@
-## Módulo de Medicamentos
+# Plano — Polimentos finais do Amparo
 
-Implementa lista, criação, edição, detalhe e histórico em `/familia/$familyId/medicamentos*`, com check de tomada, upload de foto, change history e calendário de adesão.
+Aplicar os 8 pontos em ordem de dependência. Onde a especificação diverge do que o projeto já tem, sigo a convenção do projeto (TanStack Start, paleta teal Cuida/Acolhimento) e sinalizo abaixo.
 
----
+## Notas de contexto importantes
 
-### 1. Migração de schema
-
-**Enum `medication_status`** — adicionar valor `ended` (hoje tem `active|paused|archived`; spec usa `ended`).
-
-**Tabela `medications`** — adicionar colunas:
-- `generic_name text`
-- `form text` (comprimido, cápsula, gotas, xarope, injeção, adesivo, outro)
-- `start_date date default current_date`
-- `end_date date`
-- `prescriber text`
-- `photo_path text` (caminho no bucket `medication-photos`)
-
-**Tabela `medication_logs`** — adicionar:
-- `status text not null default 'taken'` check in (`taken`,`missed`,`skipped`)
-- `logged_by uuid` (auth.uid de quem marcou)
-- Unique parcial `(medication_id, scheduled_for)` p/ evitar duplo-clique
-
-**Nova tabela `medication_change_history`**
-- `id`, `medication_id (fk on delete cascade)`, `field_changed text`, `old_value text`, `new_value text`, `changed_by uuid`, `changed_at timestamptz default now()`
-- GRANTs p/ authenticated + service_role; RLS:
-  - SELECT: `is_family_member(patient_family(medication.patient_id), auth.uid())`
-  - INSERT: `is_family_admin(...)` + `changed_by = auth.uid()`
-- Index `(medication_id, changed_at desc)`
-
-**Bucket `medication-photos`** (privado) + policies: admins da família escrevem/leem (path `patientId/...`); membros leem.
+- **Não existe `index.html`.** Este projeto é TanStack Start — `<title>`, manifest, meta de PWA e theme-color vivem em `src/routes/__root.tsx` dentro de `head()` e `RootShell`. Aplico tudo lá.
+- **Theme-color:** a spec sugere `#2563eb` (azul). A identidade do Amparo é teal `#01373d` (primary). Vou usar `#01373d` no `theme_color` do manifest e nos ícones para manter coerência de marca — confirme se prefere o azul mesmo assim.
+- **Sonner já está instalado e o `<Toaster />` já está montado** no root. Só preciso criar o helper de retry e padronizar uso.
+- **EmptyState já existe** em `src/components/ui-extras.tsx` — vou estendê-lo para aceitar uma ilustração SVG opcional além do ícone.
 
 ---
 
-### 2. Estrutura de arquivos
+## 1. Empty states acolhedores
 
-```text
-src/features/medications/
-  api.ts                      # queries/mutations (createServerFn não — uso direto via supabase client com RLS)
-  types.ts                    # tipos Medication, MedicationLog, ChangeHistory, FORM_OPTIONS, FREQ_OPTIONS
-  utils.ts                    # parseSchedule, nextDoseToday, formatTime
-  MedicationsList.tsx         # abas + cards + FAB "+"
-  MedicationCard.tsx          # card com check + botão ⋮
-  MedicationActionsSheet.tsx  # bottom sheet Editar/Pausar/Encerrar/Histórico
-  MedicationForm.tsx          # form reutilizado por novo/editar (seções)
-  PhotoUploader.tsx           # input câmera/galeria + preview + upload
-  ScheduleField.tsx           # N time pickers conforme frequência
-  AdherenceCalendar.tsx       # grade 30 dias colorida
-  ChangeHistoryTimeline.tsx
-  LogsList.tsx                # últimos 10 logs
-  EndMedicationDialog.tsx
+- Estender `EmptyState` com prop `illustration?: ReactNode` (SVG inline). Manter ícone como fallback.
+- Criar `src/components/illustrations/` com 4 SVGs simples (~120×120, traços leves em `currentColor` para herdar o teal): `PillsEmpty`, `CalendarEmpty`, `DocsEmpty`, `HistoryEmpty`.
+- Atualizar copy + CTA em cada lista:
+  - Medicamentos → "Nenhum medicamento cadastrado ainda." / "Cadastrar primeiro"
+  - Agenda → "Nenhuma consulta agendada." / "Agendar consulta"
+  - Documentos → "Sua biblioteca está vazia. Suba o primeiro documento." / "Subir agora"
+  - Histórico → "Nenhum evento clínico registrado." / "Registrar primeiro evento"
+- Texto em `text-muted-foreground` (token semântico que já corresponde ao cinza acolhedor — não usar `text-gray-600` hardcoded).
 
-src/routes/
-  familia.$familyId.medicamentos.tsx           # refatorada → renderiza MedicationsList
-  familia.$familyId.medicamentos.novo.tsx       # refatorada → MedicationForm (mode=create)
-  familia.$familyId.medicamentos.$medId.tsx           # NOVO — detalhe
-  familia.$familyId.medicamentos.$medId.editar.tsx    # NOVO — MedicationForm (mode=edit)
-```
+## 2. Feedback de ações (sonner + retry)
 
----
+- Criar `src/lib/toast.ts` com helpers:
+  - `toastSuccess(msg)` → `toast.success(msg, { duration: 3000 })`
+  - `toastError(err, retry?: () => void)` → `toast.error(msg, { duration: 5000, action: retry ? { label: "Tentar novamente", onClick: retry } : undefined })`
+- Padronizar nas mutations existentes: `onError: (e) => toastError(e, () => mutation.mutate(vars))`. Aplicar em medicamentos, agenda, documentos, histórico, membros, perfil, paciente.
+- Criar componente `<LoadingButton>` (wrapper sobre `Button`) que aceita `loading` e troca o conteúdo por `<Loader2 className="animate-spin" />` + mantém largura. Substituir nos formulários de criação/edição.
 
-### 3. Tela `/medicamentos` (lista)
+## 3. Confirmações destrutivas padronizadas
 
-- `Tabs` shadcn: **Ativos | Pausados | Encerrados** (queries separadas por `status`).
-- Mantém botão "+ Adicionar" no `PageHeader`.
-- `MedicationCard`:
-  - Nome + dosagem + frequência
-  - Próximos horários do dia (renderiza chips a partir de `schedule jsonb`)
-  - Badge de status (cor via tokens: `success` ativo, `warn` pausado, `muted` encerrado)
-  - Botão **"✓ Marcar como tomado"** aparece para o próximo horário ainda não logado de hoje; ao clicar faz `upsert` em `medication_logs` `(medication_id, scheduled_for=hoje+HH:MM)` com `taken_at=now()`, `taken_by=auth.uid`, `status='taken'`, e invalida query do card 4 do dashboard.
-  - Botão **⋮** no canto superior direito abre `MedicationActionsSheet`:
-    - Editar → `/familia/$familyId/medicamentos/$medId/editar`
-    - Pausar → `update status='paused'`
-    - Encerrar → abre `EndMedicationDialog` (confirmação) → `status='ended'`
-    - Ver histórico completo → `/familia/$familyId/medicamentos/$medId`
+- Criar `src/components/ConfirmDeleteDialog.tsx` reutilizável (sobre `AlertDialog` do shadcn):
+  - Props: `open`, `onOpenChange`, `itemName`, `description?`, `onConfirm`, `loading`.
+  - Título: `Excluir {itemName}?` · Descrição: "Esta ação não pode ser desfeita."
+  - Confirmar: `variant="destructive"` "Sim, excluir" · Cancelar: "Voltar".
+- Substituir os modais ad-hoc em: deletar documento, remover membro da família, encerrar medicamento (status → discontinued), cancelar consulta (status → cancelled), remover alergia/condição/contato no perfil do paciente.
 
----
+## 4. Offline banner
 
-### 4. Form (novo e editar) — `/medicamentos/novo` e `/medicamentos/$medId/editar`
+- Criar hook `src/hooks/useOnlineStatus.ts` que retorna `online` baseado em `navigator.onLine` + listeners `online`/`offline`.
+- Criar `src/components/OfflineBanner.tsx`: barra fixa abaixo do `AppHeader` (amarela, usando token `--warn-soft` + `text-warn`), copy: "Sem conexão — exibindo dados salvos. Alterações serão sincronizadas ao reconectar."
+- Montar dentro de `AppLayout`, logo após o header.
+- Ao voltar online: `queryClient.invalidateQueries()` (refetch global) + dismiss automático.
 
-Formulário em **seções com separador** (heading + `<Separator/>`):
+## 5. Responsividade
 
-**Identificação** — Nome*, Nome genérico, Dosagem (texto livre), Forma (Select), Foto (`PhotoUploader` → bucket `medication-photos`).
+- Auditoria visual nos 4 breakpoints (375/390/768/1280) das telas principais: dashboard, listas (med/agenda/docs/histórico), perfil do paciente, perfil do usuário, central de emergência.
+- Correções comuns esperadas: `overflow-x-hidden` em containers de listas com badges longos, `flex-wrap` em headers com várias ações, `truncate` em nomes longos.
+- Nada estrutural — só ajustes localizados onde quebrar.
 
-**Posologia** — Frequência (Select 1x/2x/3x/4x/conforme necessário/outro). `ScheduleField` renderiza N time pickers (ou textarea livre p/ "outro", ou nada p/ "conforme necessário"). Serializado: `[{"time":"08:00"},...]` ou `null`.
+## 6. Acessibilidade básica
 
-**Período** — Data início (shadcn Calendar via Popover, default hoje), Data fim (opcional), Prescritor.
+- Varredura em `Button size="icon"` sem `aria-label` (header, sidebar, ações em cards, setas de reordenação, fechar modais) — adicionar labels descritivos em PT-BR.
+- Garantir `htmlFor`/`id` em todos os pares `Label`/`Input` (usar `useId` em formulários repetidos).
+- Garantir `min-h-11 min-w-11` nos botões icônicos primários (já é o caso da maioria dos `Button` default; ajustar onde for `size="icon"` em ações primárias).
+- Verificar que não há texto em `text-muted-foreground/50` ou tons hardcoded de cinza claro.
 
-**Observações** — Textarea.
+## 7. Página de Perfil do Usuário (`/perfil`)
 
-Submit:
-- Create: `insert` em `medications`.
-- Edit: faz `select` do estado antigo, monta diff campo-a-campo (incluindo `schedule` serializado e `photo_path`), executa `update` + `insert` em `medication_change_history` com `{field_changed, old_value, new_value, changed_by: auth.uid()}` para cada campo alterado.
-- `toast` + invalidate + navega para `/medicamentos/$medId` (edit) ou lista (create).
+- **Migração:** adicionar coluna `phone text` em `public.profiles` (e regenerar tipos).
+- Refatorar `src/routes/perfil.tsx` para:
+  - Foto: upload em bucket existente (avatars) ou criar bucket `profile-photos` se não houver — vou usar `patient-photos` não, vou criar `profile-photos` com policy `auth.uid() = (folder)[1]`. Atualiza `profiles.avatar_url` com o path.
+  - Campos editáveis inline: `full_name`, `phone`. Email read-only via `user.email`.
+  - Botão "Sair" → `AlertDialog` simples → `signOut()` → `/login`.
+  - Botão "Excluir minha conta" (destructive):
+    1. Query: buscar todas famílias onde sou admin e contar quantos outros admins ativos têm. Helper `checkSoleAdminFamilies(userId)`.
+    2. Se for único admin de pelo menos uma família → bloqueio: card de aviso com nome da(s) família(s) + botão "Gerenciar família" para `/familia/$id/membros`. Não renderizar botão de excluir.
+    3. Caso contrário → dupla confirmação:
+       - Modal 1: "Tem certeza? Todos os seus dados serão removidos."
+       - Modal 2: input "digite seu email para confirmar" → habilita botão final.
+    4. Executar via server function `deleteMyAccount` (`createServerFn` + `requireSupabaseAuth` + `supabaseAdmin.auth.admin.deleteUser(userId)`). Cascata cuida do resto (FKs já estão `ON DELETE CASCADE`).
+    5. Após sucesso: `signOut()` + redirect `/login`.
 
----
+## 8. PWA básico (apenas manifest — sem service worker)
 
-### 5. Tela `/medicamentos/$medId` (detalhe)
+> Seguindo a recomendação do template: instalabilidade sem service worker para não quebrar o preview do editor.
 
-- Header com nome + dosagem + botão "Editar".
-- Bloco campos em modo leitura (forma, prescritor, período, observações, foto se houver — `getPublicUrl`/signed URL).
-- **Histórico de tomadas — últimos 30 dias**: `AdherenceCalendar` (grid 5x6 com células coloridas):
-  - verde (`success`) = `status='taken'`
-  - vermelho (`emergency`) = `status='missed'`
-  - cinza claro (`muted`) = sem registro ou futuro
-  - sem cor / hidden = anterior ao `start_date`
-- `LogsList`: últimos 10 logs com horário e nome de quem registrou. Como não há tabela `profiles` no schema, mostrar email/identificador disponível via `family_members` (join por `taken_by`) → fallback "Você"/"Outro membro". *(Nota: spec menciona `profiles.full_name` que não existe; usaremos relation/email do family_members ou só "Membro" se não disponível.)*
-- **Histórico de alterações**: timeline lendo `medication_change_history`.
-- Botão **"Encerrar medicamento"** vermelho ao final → `EndMedicationDialog` → `status='ended'`.
-
----
-
-### 6. Notas técnicas / decisões
-
-- Tudo client-side via `supabase` browser client (RLS já cobre admin/member). Sem `createServerFn` neste módulo (consistente com o resto do app).
-- `auth.uid()` lido via `supabase.auth.getUser()` antes de inserir em `medication_logs.taken_by` e `medication_change_history.changed_by`.
-- `medication_logs` upsert usa unique `(medication_id, scheduled_for)`; "Marcar como tomado" gera o registro caso não exista.
-- Upload de foto: input `accept="image/*"` (Mobile: câmera/galeria nativa via prompt; sem `capture` para preservar opção de galeria); preview com `URL.createObjectURL`; path `${patientId}/${medId}/${uuid}.jpg`.
-- `regeneratePatientLogsForToday()`: ao salvar/editar medicamento ativo com `schedule`, **não** pré-gera logs — eles nascem só quando marcados (mantém DB enxuto). `AdherenceCalendar` cruza com `start_date` para pintar células esperadas.
-- Cores: usar tokens (`bg-primary-soft`, `bg-success`, `bg-emergency`, `bg-warn`, `bg-muted`) — nada hardcoded.
-- Atualiza `src/integrations/supabase/types.ts` automaticamente após migração (Lovable).
+- Criar `public/manifest.json` com os campos da spec (mas `theme_color: "#01373d"` para casar com a marca — confirme se prefere o azul `#2563eb`).
+- Gerar `public/icons/icon-192.png` e `public/icons/icon-512.png` (fundo teal `#01373d`, letra "A" branca centralizada, fonte Plus Jakarta semibold). Uso ferramenta de geração de imagem em modo premium para garantir tipografia limpa.
+- No `__root.tsx` adicionar em `head()`:
+  - `<link rel="manifest" href="/manifest.json">` (via `links`)
+  - `<meta name="theme-color" content="#01373d">` (substituir o `#ffffff` atual)
+  - `<meta name="apple-mobile-web-app-capable" content="yes">`
+  - `<meta name="apple-mobile-web-app-status-bar-style" content="default">`
+- Atualizar `<title>` + `description` para o copy da spec.
+- **Não** instalar `vite-plugin-pwa` nem criar service worker.
 
 ---
 
-### 7. Fora do escopo
+## Ordem de execução
 
-- Notificações push de horário.
-- Auto-geração de logs `missed` (precisaria job/cron). `AdherenceCalendar` pinta vermelho apenas se já houver log com `status='missed'` registrado.
-- Edição em lote / scan de receita por IA.
+1. Migração `profiles.phone` + bucket `profile-photos` (precisa aprovação).
+2. Infra compartilhada: `toast.ts`, `LoadingButton`, `ConfirmDeleteDialog`, `useOnlineStatus`, `OfflineBanner`, ilustrações SVG, extensão do `EmptyState`.
+3. Montar `OfflineBanner` no `AppLayout` e atualizar empty states de cada módulo.
+4. Substituir confirmações destrutivas + padronizar toasts/retry em todas as mutations.
+5. Reescrever `/perfil` (upload, edição, sair, fluxo de exclusão).
+6. Server function `deleteMyAccount`.
+7. PWA: manifest + ícones + meta tags.
+8. Passada final de a11y (`aria-label`, contraste, `htmlFor`) e responsividade (375/390/768/1280).
+
+## Confirmar antes de executar
+
+- Theme color: **teal `#01373d`** (sugestão, casa com a marca) **ou azul `#2563eb`** (literal da spec)?
