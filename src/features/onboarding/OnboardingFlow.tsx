@@ -52,6 +52,7 @@ export function OnboardingFlow() {
 
       setFamilyData(data);
       setFamilyId(fam.id);
+      setActiveFamily({ id: fam.id, name: data.name });
       setStep(3);
     } catch (err: any) {
       toast.error("Não foi possível criar a família", { description: err.message });
