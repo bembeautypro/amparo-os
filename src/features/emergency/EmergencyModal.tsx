@@ -167,22 +167,15 @@ export function EmergencyModal({ patientId, open, onOpenChange }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="h-screen max-h-screen w-screen max-w-none rounded-none border-0 bg-background p-0 sm:rounded-none"
-        showCloseButton={false}
       >
         <div className="flex h-full flex-col">
           {/* Top bar */}
-          <div className="flex items-center justify-between bg-emergency px-4 py-3 text-emergency-foreground">
+          <div className="flex items-center justify-between bg-emergency px-4 py-3 pr-12 text-emergency-foreground">
             <div className="flex items-center gap-2 font-semibold">
               <AlertTriangle className="h-5 w-5" /> Emergência
             </div>
-            <button
-              onClick={() => onOpenChange(false)}
-              aria-label="Fechar"
-              className="grid h-9 w-9 place-items-center rounded-full hover:bg-white/10"
-            >
-              <X className="h-5 w-5" />
-            </button>
           </div>
+
 
           <Tabs defaultValue="resumo" className="flex min-h-0 flex-1 flex-col">
             <TabsList className="mx-4 mt-3 grid h-11 w-auto grid-cols-2">
