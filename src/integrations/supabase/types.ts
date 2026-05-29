@@ -716,7 +716,13 @@ export type Database = {
         | "personal_doc"
         | "hospital_discharge"
         | "vaccine"
-      family_role: "admin" | "member" | "caregiver"
+      family_role:
+        | "admin"
+        | "member"
+        | "caregiver"
+        | "editor"
+        | "viewer"
+        | "doctor"
       medication_status: "active" | "paused" | "archived" | "ended"
       member_relation: "child" | "spouse" | "caregiver" | "other"
       member_status: "active" | "invited"
@@ -888,7 +894,14 @@ export const Constants = {
         "hospital_discharge",
         "vaccine",
       ],
-      family_role: ["admin", "member", "caregiver"],
+      family_role: [
+        "admin",
+        "member",
+        "caregiver",
+        "editor",
+        "viewer",
+        "doctor",
+      ],
       medication_status: ["active", "paused", "archived", "ended"],
       member_relation: ["child", "spouse", "caregiver", "other"],
       member_status: ["active", "invited"],
