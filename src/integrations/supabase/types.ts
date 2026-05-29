@@ -105,6 +105,7 @@ export type Database = {
           name: string
           patient_id: string
           phone: string
+          priority: number
           relation: string | null
         }
         Insert: {
@@ -113,6 +114,7 @@ export type Database = {
           name: string
           patient_id: string
           phone: string
+          priority?: number
           relation?: string | null
         }
         Update: {
@@ -121,6 +123,7 @@ export type Database = {
           name?: string
           patient_id?: string
           phone?: string
+          priority?: number
           relation?: string | null
         }
         Relationships: [
@@ -274,18 +277,21 @@ export type Database = {
           id: string
           name: string
           patient_id: string
+          status: Database["public"]["Enums"]["condition_status"]
         }
         Insert: {
           created_at?: string
           id?: string
           name: string
           patient_id: string
+          status?: Database["public"]["Enums"]["condition_status"]
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
           patient_id?: string
+          status?: Database["public"]["Enums"]["condition_status"]
         }
         Relationships: [
           {
@@ -366,6 +372,7 @@ export type Database = {
         | "O+"
         | "O-"
         | "unknown"
+      condition_status: "active" | "inactive"
       document_type: "prescription" | "exam" | "report" | "other"
       family_role: "admin" | "member" | "caregiver"
       member_relation: "child" | "spouse" | "caregiver" | "other"
@@ -500,6 +507,7 @@ export const Constants = {
     Enums: {
       appointment_status: ["scheduled", "done", "cancelled"],
       blood_type: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "unknown"],
+      condition_status: ["active", "inactive"],
       document_type: ["prescription", "exam", "report", "other"],
       family_role: ["admin", "member", "caregiver"],
       member_relation: ["child", "spouse", "caregiver", "other"],
