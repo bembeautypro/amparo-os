@@ -224,6 +224,20 @@ export function OnboardingFlow() {
           {step === 5 && familyId && (
             <StepFirstAction familyId={familyId} onChoose={finish} />
           )}
+
+          {(step === 4 || step === 5) && (
+            <div className="mt-6 flex">
+              <Button
+                type="button"
+                variant="link"
+                disabled={loading}
+                onClick={() => (step === 4 ? setStep(5) : finish("/dashboard"))}
+                className="px-0 text-sm text-muted-foreground hover:text-foreground"
+              >
+                Preencher depois
+              </Button>
+            </div>
+          )}
         </div>
       </main>
     </div>
