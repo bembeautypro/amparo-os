@@ -1,15 +1,3 @@
-import type {
-  FileText,
-  FileImage,
-  Stethoscope,
-  ClipboardList,
-  IdCard,
-  Pill,
-  Syringe,
-  HeartPulse,
-  FileType2,
-} from "lucide-react";
-
 export type DocumentType =
   | "prescription"
   | "exam"
@@ -20,13 +8,6 @@ export type DocumentType =
   | "hospital_discharge"
   | "vaccine"
   | "other";
-
-type Meta = {
-  value: DocumentType;
-  label: string;
-  icon: typeof FileText;
-  emoji: string;
-};
 
 // Lightweight metadata (icons referenced from list/form components)
 export const DOC_TYPES: Array<{ value: DocumentType; label: string; emoji: string }> = [
