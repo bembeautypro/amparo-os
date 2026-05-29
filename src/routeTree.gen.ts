@@ -14,7 +14,6 @@ import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FamiliaRouteImport } from './routes/familia'
-import { Route as EmergenciaRouteImport } from './routes/emergencia'
 import { Route as DocumentosRouteImport } from './routes/documentos'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AgendaRouteImport } from './routes/agenda'
@@ -63,11 +62,6 @@ const LoginRoute = LoginRouteImport.update({
 const FamiliaRoute = FamiliaRouteImport.update({
   id: '/familia',
   path: '/familia',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EmergenciaRoute = EmergenciaRouteImport.update({
-  id: '/emergencia',
-  path: '/emergencia',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocumentosRoute = DocumentosRouteImport.update({
@@ -211,7 +205,6 @@ export interface FileRoutesByFullPath {
   '/agenda': typeof AgendaRoute
   '/dashboard': typeof DashboardRoute
   '/documentos': typeof DocumentosRoute
-  '/emergencia': typeof EmergenciaRouteWithChildren
   '/familia': typeof FamiliaRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
@@ -243,7 +236,6 @@ export interface FileRoutesByTo {
   '/agenda': typeof AgendaRoute
   '/dashboard': typeof DashboardRoute
   '/documentos': typeof DocumentosRoute
-  '/emergencia': typeof EmergenciaRouteWithChildren
   '/familia': typeof FamiliaRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
@@ -276,7 +268,6 @@ export interface FileRoutesById {
   '/agenda': typeof AgendaRoute
   '/dashboard': typeof DashboardRoute
   '/documentos': typeof DocumentosRoute
-  '/emergencia': typeof EmergenciaRouteWithChildren
   '/familia': typeof FamiliaRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
@@ -310,7 +301,6 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/dashboard'
     | '/documentos'
-    | '/emergencia'
     | '/familia'
     | '/login'
     | '/onboarding'
@@ -342,7 +332,6 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/dashboard'
     | '/documentos'
-    | '/emergencia'
     | '/familia'
     | '/login'
     | '/onboarding'
@@ -374,7 +363,6 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/dashboard'
     | '/documentos'
-    | '/emergencia'
     | '/familia'
     | '/login'
     | '/onboarding'
@@ -407,7 +395,6 @@ export interface RootRouteChildren {
   AgendaRoute: typeof AgendaRoute
   DashboardRoute: typeof DashboardRoute
   DocumentosRoute: typeof DocumentosRoute
-  EmergenciaRoute: typeof EmergenciaRouteWithChildren
   FamiliaRoute: typeof FamiliaRouteWithChildren
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
@@ -451,13 +438,6 @@ declare module '@tanstack/react-router' {
       path: '/familia'
       fullPath: '/familia'
       preLoaderRoute: typeof FamiliaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/emergencia': {
-      id: '/emergencia'
-      path: '/emergencia'
-      fullPath: '/emergencia'
-      preLoaderRoute: typeof EmergenciaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/documentos': {
@@ -631,18 +611,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface EmergenciaRouteChildren {
-  EmergenciaTokenRoute: typeof EmergenciaTokenRoute
-}
-
-const EmergenciaRouteChildren: EmergenciaRouteChildren = {
-  EmergenciaTokenRoute: EmergenciaTokenRoute,
-}
-
-const EmergenciaRouteWithChildren = EmergenciaRoute._addFileChildren(
-  EmergenciaRouteChildren,
-)
-
 interface FamiliaFamilyIdAgendaIdRouteChildren {
   FamiliaFamilyIdAgendaIdEditarRoute: typeof FamiliaFamilyIdAgendaIdEditarRoute
 }
@@ -794,7 +762,6 @@ const rootRouteChildren: RootRouteChildren = {
   AgendaRoute: AgendaRoute,
   DashboardRoute: DashboardRoute,
   DocumentosRoute: DocumentosRoute,
-  EmergenciaRoute: EmergenciaRouteWithChildren,
   FamiliaRoute: FamiliaRouteWithChildren,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
