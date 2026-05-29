@@ -85,9 +85,12 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
+          doctor_name: string | null
           event_date: string
           id: string
           patient_id: string
+          severity: Database["public"]["Enums"]["clinical_severity"]
+          tags: string[]
           title: string
           type: Database["public"]["Enums"]["clinical_event_type"]
           updated_at: string
@@ -97,9 +100,12 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          doctor_name?: string | null
           event_date?: string
           id?: string
           patient_id: string
+          severity?: Database["public"]["Enums"]["clinical_severity"]
+          tags?: string[]
           title: string
           type?: Database["public"]["Enums"]["clinical_event_type"]
           updated_at?: string
@@ -109,9 +115,12 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          doctor_name?: string | null
           event_date?: string
           id?: string
           patient_id?: string
+          severity?: Database["public"]["Enums"]["clinical_severity"]
+          tags?: string[]
           title?: string
           type?: Database["public"]["Enums"]["clinical_event_type"]
           updated_at?: string
@@ -129,6 +138,7 @@ export type Database = {
       documents: {
         Row: {
           appointment_id: string | null
+          clinical_event_id: string | null
           created_at: string
           doc_type: Database["public"]["Enums"]["document_type"]
           exam_date: string | null
@@ -143,6 +153,7 @@ export type Database = {
         }
         Insert: {
           appointment_id?: string | null
+          clinical_event_id?: string | null
           created_at?: string
           doc_type?: Database["public"]["Enums"]["document_type"]
           exam_date?: string | null
@@ -157,6 +168,7 @@ export type Database = {
         }
         Update: {
           appointment_id?: string | null
+          clinical_event_id?: string | null
           created_at?: string
           doc_type?: Database["public"]["Enums"]["document_type"]
           exam_date?: string | null
@@ -175,6 +187,13 @@ export type Database = {
             columns: ["appointment_id"]
             isOneToOne: false
             referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_clinical_event_id_fkey"
+            columns: ["clinical_event_id"]
+            isOneToOne: false
+            referencedRelation: "clinical_events"
             referencedColumns: ["id"]
           },
         ]
@@ -532,6 +551,30 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -567,6 +610,14 @@ export type Database = {
         | "diagnosis"
         | "vaccination"
         | "other"
+        | "surgery"
+        | "symptom"
+        | "fall"
+        | "medication_change"
+        | "follow_up"
+        | "crisis"
+        | "family_observation"
+      clinical_severity: "low" | "medium" | "high" | "critical"
       condition_status: "active" | "inactive"
       document_type: "prescription" | "exam" | "report" | "other"
       family_role: "admin" | "member" | "caregiver"
@@ -720,7 +771,15 @@ export const Constants = {
         "diagnosis",
         "vaccination",
         "other",
+        "surgery",
+        "symptom",
+        "fall",
+        "medication_change",
+        "follow_up",
+        "crisis",
+        "family_observation",
       ],
+      clinical_severity: ["low", "medium", "high", "critical"],
       condition_status: ["active", "inactive"],
       document_type: ["prescription", "exam", "report", "other"],
       family_role: ["admin", "member", "caregiver"],
