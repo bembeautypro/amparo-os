@@ -619,7 +619,16 @@ export type Database = {
         | "family_observation"
       clinical_severity: "low" | "medium" | "high" | "critical"
       condition_status: "active" | "inactive"
-      document_type: "prescription" | "exam" | "report" | "other"
+      document_type:
+        | "prescription"
+        | "exam"
+        | "report"
+        | "other"
+        | "medical_order"
+        | "insurance_card"
+        | "personal_doc"
+        | "hospital_discharge"
+        | "vaccine"
       family_role: "admin" | "member" | "caregiver"
       medication_status: "active" | "paused" | "archived" | "ended"
       member_relation: "child" | "spouse" | "caregiver" | "other"
@@ -781,7 +790,17 @@ export const Constants = {
       ],
       clinical_severity: ["low", "medium", "high", "critical"],
       condition_status: ["active", "inactive"],
-      document_type: ["prescription", "exam", "report", "other"],
+      document_type: [
+        "prescription",
+        "exam",
+        "report",
+        "other",
+        "medical_order",
+        "insurance_card",
+        "personal_doc",
+        "hospital_discharge",
+        "vaccine",
+      ],
       family_role: ["admin", "member", "caregiver"],
       medication_status: ["active", "paused", "archived", "ended"],
       member_relation: ["child", "spouse", "caregiver", "other"],
