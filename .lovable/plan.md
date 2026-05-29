@@ -1,149 +1,129 @@
-## Objetivo
+## Módulo de Medicamentos
 
-Transformar `/dashboard` na home principal que responde visualmente às 7 perguntas do usuário, com cards independentes (cada um com seu `useQuery` + skeleton), seletor de paciente sticky, FAB de ações rápidas e único botão de emergência do app.
-
----
-
-## 1. Migração de schema (novo)
-
-Tabela única + colunas faltantes para suportar o briefing 100%:
-
-```sql
--- medications: status + schedule (horários do dia)
-CREATE TYPE public.medication_status AS ENUM ('active','paused','archived');
-ALTER TABLE public.medications
-  ADD COLUMN status public.medication_status NOT NULL DEFAULT 'active',
-  ADD COLUMN schedule jsonb;  -- ex: ["08:00","14:00","20:00"]
-
--- appointments: responsável (membro da família)
-ALTER TABLE public.appointments
-  ADD COLUMN responsible_user_id uuid;
-CREATE INDEX appointments_responsible_idx ON public.appointments(responsible_user_id);
-
--- medication_logs: histórico de "tomado"
-CREATE TABLE public.medication_logs (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  medication_id uuid NOT NULL,
-  patient_id uuid NOT NULL,
-  scheduled_for timestamptz NOT NULL,   -- horário planejado do dia
-  taken_at timestamptz,                 -- preenchido quando marcado como tomado
-  taken_by uuid,
-  created_at timestamptz NOT NULL DEFAULT now()
-);
-CREATE INDEX medication_logs_patient_day_idx
-  ON public.medication_logs(patient_id, scheduled_for);
-
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.medication_logs TO authenticated;
-GRANT ALL ON public.medication_logs TO service_role;
-ALTER TABLE public.medication_logs ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "members can view medication logs"
-  ON public.medication_logs FOR SELECT TO authenticated
-  USING (app_private.is_family_member(app_private.patient_family(patient_id), auth.uid()));
-
-CREATE POLICY "admins can manage medication logs"
-  ON public.medication_logs FOR ALL TO authenticated
-  USING (app_private.is_family_admin(app_private.patient_family(patient_id), auth.uid()))
-  WITH CHECK (app_private.is_family_admin(app_private.patient_family(patient_id), auth.uid()));
-```
+Implementa lista, criação, edição, detalhe e histórico em `/familia/$familyId/medicamentos*`, com check de tomada, upload de foto, change history e calendário de adesão.
 
 ---
 
-## 2. Estrutura de arquivos
+### 1. Migração de schema
+
+**Enum `medication_status`** — adicionar valor `ended` (hoje tem `active|paused|archived`; spec usa `ended`).
+
+**Tabela `medications`** — adicionar colunas:
+- `generic_name text`
+- `form text` (comprimido, cápsula, gotas, xarope, injeção, adesivo, outro)
+- `start_date date default current_date`
+- `end_date date`
+- `prescriber text`
+- `photo_path text` (caminho no bucket `medication-photos`)
+
+**Tabela `medication_logs`** — adicionar:
+- `status text not null default 'taken'` check in (`taken`,`missed`,`skipped`)
+- `logged_by uuid` (auth.uid de quem marcou)
+- Unique parcial `(medication_id, scheduled_for)` p/ evitar duplo-clique
+
+**Nova tabela `medication_change_history`**
+- `id`, `medication_id (fk on delete cascade)`, `field_changed text`, `old_value text`, `new_value text`, `changed_by uuid`, `changed_at timestamptz default now()`
+- GRANTs p/ authenticated + service_role; RLS:
+  - SELECT: `is_family_member(patient_family(medication.patient_id), auth.uid())`
+  - INSERT: `is_family_admin(...)` + `changed_by = auth.uid()`
+- Index `(medication_id, changed_at desc)`
+
+**Bucket `medication-photos`** (privado) + policies: admins da família escrevem/leem (path `patientId/...`); membros leem.
+
+---
+
+### 2. Estrutura de arquivos
 
 ```text
-src/features/dashboard/
-  DashboardHome.tsx           # orquestrador (seletor sticky + cards + FAB)
-  PatientSwitcher.tsx         # abas sticky com foto + nome (esconde se ≤1 paciente)
-  QuickActionsFab.tsx         # FAB "+" + Sheet com 4 ações
-  cards/
-    PatientCard.tsx           # CARD 1 — foto, idade, sangue, badges, botão Emergência
-    AlertsCard.tsx            # CARD 2 — condicional, query cruzada de pendências
-    AppointmentsCard.tsx      # CARD 3 — próximos 3 compromissos
-    MedicationsTodayCard.tsx  # CARD 4 — meds ativas + horários + Tomado/Pendente
-    DocumentsRecentCard.tsx   # CARD 5 — últimos 3 documentos
-    FamilyCard.tsx            # CARD 6 — avatares dos membros ativos
-    CardSkeleton.tsx          # shared skeleton
-  hooks/
-    useDashboardQueries.ts    # queryOptions por card (paralelo, dependentes de patientId)
-src/lib/age.ts                # calcAge(birth_date) → "78 anos"
-src/lib/dates.ts              # formatRelativeDateTime ("Amanhã, 14h" / "Sex 23/05, 10h")
+src/features/medications/
+  api.ts                      # queries/mutations (createServerFn não — uso direto via supabase client com RLS)
+  types.ts                    # tipos Medication, MedicationLog, ChangeHistory, FORM_OPTIONS, FREQ_OPTIONS
+  utils.ts                    # parseSchedule, nextDoseToday, formatTime
+  MedicationsList.tsx         # abas + cards + FAB "+"
+  MedicationCard.tsx          # card com check + botão ⋮
+  MedicationActionsSheet.tsx  # bottom sheet Editar/Pausar/Encerrar/Histórico
+  MedicationForm.tsx          # form reutilizado por novo/editar (seções)
+  PhotoUploader.tsx           # input câmera/galeria + preview + upload
+  ScheduleField.tsx           # N time pickers conforme frequência
+  AdherenceCalendar.tsx       # grade 30 dias colorida
+  ChangeHistoryTimeline.tsx
+  LogsList.tsx                # últimos 10 logs
+  EndMedicationDialog.tsx
+
+src/routes/
+  familia.$familyId.medicamentos.tsx           # refatorada → renderiza MedicationsList
+  familia.$familyId.medicamentos.novo.tsx       # refatorada → MedicationForm (mode=create)
+  familia.$familyId.medicamentos.$medId.tsx           # NOVO — detalhe
+  familia.$familyId.medicamentos.$medId.editar.tsx    # NOVO — MedicationForm (mode=edit)
 ```
 
-Reescrita completa de `src/routes/dashboard.tsx` para usar `DashboardHome` (substituindo StatCards e seções atuais). Empty states (sem família / sem paciente) preservados do arquivo atual.
+---
+
+### 3. Tela `/medicamentos` (lista)
+
+- `Tabs` shadcn: **Ativos | Pausados | Encerrados** (queries separadas por `status`).
+- Mantém botão "+ Adicionar" no `PageHeader`.
+- `MedicationCard`:
+  - Nome + dosagem + frequência
+  - Próximos horários do dia (renderiza chips a partir de `schedule jsonb`)
+  - Badge de status (cor via tokens: `success` ativo, `warn` pausado, `muted` encerrado)
+  - Botão **"✓ Marcar como tomado"** aparece para o próximo horário ainda não logado de hoje; ao clicar faz `upsert` em `medication_logs` `(medication_id, scheduled_for=hoje+HH:MM)` com `taken_at=now()`, `taken_by=auth.uid`, `status='taken'`, e invalida query do card 4 do dashboard.
+  - Botão **⋮** no canto superior direito abre `MedicationActionsSheet`:
+    - Editar → `/familia/$familyId/medicamentos/$medId/editar`
+    - Pausar → `update status='paused'`
+    - Encerrar → abre `EndMedicationDialog` (confirmação) → `status='ended'`
+    - Ver histórico completo → `/familia/$familyId/medicamentos/$medId`
 
 ---
 
-## 3. Comportamento por card
+### 4. Form (novo e editar) — `/medicamentos/novo` e `/medicamentos/$medId/editar`
 
-**Seletor de paciente (sticky)**
-- Aparece somente se `patients.length > 1`.
-- `position: sticky; top: <header-height>` dentro do `AppLayout`, atrás de safe-area.
-- Abas horizontais com scroll (avatar 36px + primeiro nome). Estado ativo usa `primary-soft` + borda `primary`.
-- Clicar chama `setActivePatient(p)` do FamilyContext (já persiste em localStorage).
+Formulário em **seções com separador** (heading + `<Separator/>`):
 
-**CARD 1 — Familiar ativo**
-- Foto 80px (`PatientAvatarImage` resolve signed URL), nome, idade calculada de `birth_date`, tipo sanguíneo (se houver).
-- Badges em linha: alergias com `severity='high'` → `bg-emergency text-emergency-foreground`; condições com `status='active'` → token `primary-soft`/`primary` (sem cores Tailwind hardcoded).
-- Botão `bg-emergency` "🚨 Emergência" → `/emergencia`. ÚNICO botão de emergência (header já não tem).
+**Identificação** — Nome*, Nome genérico, Dosagem (texto livre), Forma (Select), Foto (`PhotoUploader` → bucket `medication-photos`).
 
-**CARD 2 — Alertas (condicional)**
-- Query cruzada: agrega 5 checks no cliente a partir das queries já em cache.
-  1. `medications` com `status='active'` e `schedule IS NULL`.
-  2. `emergency_contacts` count = 0.
-  3. `appointments` futuras com `responsible_user_id IS NULL`.
-  4. `patients.blood_type` ausente.
-  5. `patient_allergies` count = 0.
-- Só renderiza se `items.length > 0`. Fundo `bg-warn/10`, borda esquerda `border-l-4 border-warn`, ícone `AlertTriangle`. Cada linha é um `Link` para o destino de correção (medicamento → edição do med; sem contato → `/emergencia`; consulta sem responsável → detalhe da consulta; sem sangue/alergias → `/perfil` do paciente).
+**Posologia** — Frequência (Select 1x/2x/3x/4x/conforme necessário/outro). `ScheduleField` renderiza N time pickers (ou textarea livre p/ "outro", ou nada p/ "conforme necessário"). Serializado: `[{"time":"08:00"},...]` ou `null`.
 
-**CARD 3 — Próximos compromissos**
-- Query: `appointments` futuros, `status NOT IN ('cancelled','done')`, ORDER ASC LIMIT 3.
-- Item: ícone por `specialty` (fallback `CalendarCheck`), data relativa (`formatRelativeDateTime`), título, avatar do responsável (resolvido via `family_members` + `auth.users.email` se disponível; fallback iniciais).
-- Vazio: ícone + texto + botão "Agendar" → `/familia/$familyId/agenda/novo`.
+**Período** — Data início (shadcn Calendar via Popover, default hoje), Data fim (opcional), Prescritor.
 
-**CARD 4 — Medicamentos de hoje**
-- Query: `medications` WHERE `status='active'`.
-- Para cada: nome + dosagem; se `schedule IS NULL` → badge `bg-warn/15 text-warn` "Sem horário"; senão lista chips por horário do dia.
-- Cruza com `medication_logs` do dia (`scheduled_for` entre `startOfDay` e `endOfDay`) — `taken_at` preenchido → chip `success`/"Tomado"; senão `muted`/"Pendente".
-- Vazio: botão "Cadastrar" → `/familia/$familyId/medicamentos/novo`.
+**Observações** — Textarea.
 
-**CARD 5 — Documentos recentes**
-- `documents` ORDER BY `created_at` DESC LIMIT 3. Ícone por `doc_type`, título, data (`dd/MM/yyyy`).
-- Vazio: botão "Subir documento" → `/familia/$familyId/documentos/novo`.
-
-**CARD 6 — Família**
-- `family_members` WHERE `status='active'`. Avatares empilhados (máx 5, sobra → `+N`). Texto "N membros com acesso". Link "Gerenciar" → `/familia`.
+Submit:
+- Create: `insert` em `medications`.
+- Edit: faz `select` do estado antigo, monta diff campo-a-campo (incluindo `schedule` serializado e `photo_path`), executa `update` + `insert` em `medication_change_history` com `{field_changed, old_value, new_value, changed_by: auth.uid()}` para cada campo alterado.
+- `toast` + invalidate + navega para `/medicamentos/$medId` (edit) ou lista (create).
 
 ---
 
-## 4. FAB
+### 5. Tela `/medicamentos/$medId` (detalhe)
 
-- `QuickActionsFab` fixo, `bottom: calc(72px + env(safe-area-inset-bottom))`, `right: 16px`, z-index acima do conteúdo. Esconder no desktop (`lg:hidden`) — sidebar já oferece atalhos.
-- Botão `bg-primary text-primary-foreground` `rounded-full` 56px com `Plus`.
-- Click abre `Sheet` (shadcn) `side="bottom"` com 4 itens (medicamento / consulta / documento / evento clínico). "Novo evento clínico" aponta para `/familia/$familyId/documentos/novo?type=clinical_event` (placeholder — não há rota dedicada ainda).
-
----
-
-## 5. Performance / loading
-
-- Cada card declara seu próprio `queryOptions` e usa `useQuery` com `enabled: !!patientId`.
-- Skeleton local (`CardSkeleton`) enquanto `isPending`. Erros isolados → mensagem inline + retry com `queryClient.invalidateQueries({ queryKey })`.
-- Nada de `useSuspenseQuery` aqui (queremos shimmer por card, não fallback global). Não usar loader de rota.
-
----
-
-## 6. Tokens e a11y
-
-- Apenas tokens do design system (`primary`, `primary-soft`, `emergency`, `emergency-soft`, `warn`, `success`, `muted`, `border`). Sem `bg-red-*`/`bg-yellow-*`.
-- Botão emergência com `aria-label="Acessar painel de emergência"`. FAB com `aria-label="Adicionar"`. Cada card é `<section aria-labelledby>`.
-- `PatientSwitcher` é uma lista de `<button role="tab">` com `aria-selected`.
+- Header com nome + dosagem + botão "Editar".
+- Bloco campos em modo leitura (forma, prescritor, período, observações, foto se houver — `getPublicUrl`/signed URL).
+- **Histórico de tomadas — últimos 30 dias**: `AdherenceCalendar` (grid 5x6 com células coloridas):
+  - verde (`success`) = `status='taken'`
+  - vermelho (`emergency`) = `status='missed'`
+  - cinza claro (`muted`) = sem registro ou futuro
+  - sem cor / hidden = anterior ao `start_date`
+- `LogsList`: últimos 10 logs com horário e nome de quem registrou. Como não há tabela `profiles` no schema, mostrar email/identificador disponível via `family_members` (join por `taken_by`) → fallback "Você"/"Outro membro". *(Nota: spec menciona `profiles.full_name` que não existe; usaremos relation/email do family_members ou só "Membro" se não disponível.)*
+- **Histórico de alterações**: timeline lendo `medication_change_history`.
+- Botão **"Encerrar medicamento"** vermelho ao final → `EndMedicationDialog` → `status='ended'`.
 
 ---
 
-## 7. Não vai ser feito agora
+### 6. Notas técnicas / decisões
 
-- Notificações push / lembretes reais.
-- Marcação de "Tomado" inline no card (apenas leitura — escrita continua em `/familia/$familyId/medicamentos`).
-- Rota dedicada para "evento clínico" (atalho mapeia para documento por enquanto).
+- Tudo client-side via `supabase` browser client (RLS já cobre admin/member). Sem `createServerFn` neste módulo (consistente com o resto do app).
+- `auth.uid()` lido via `supabase.auth.getUser()` antes de inserir em `medication_logs.taken_by` e `medication_change_history.changed_by`.
+- `medication_logs` upsert usa unique `(medication_id, scheduled_for)`; "Marcar como tomado" gera o registro caso não exista.
+- Upload de foto: input `accept="image/*"` (Mobile: câmera/galeria nativa via prompt; sem `capture` para preservar opção de galeria); preview com `URL.createObjectURL`; path `${patientId}/${medId}/${uuid}.jpg`.
+- `regeneratePatientLogsForToday()`: ao salvar/editar medicamento ativo com `schedule`, **não** pré-gera logs — eles nascem só quando marcados (mantém DB enxuto). `AdherenceCalendar` cruza com `start_date` para pintar células esperadas.
+- Cores: usar tokens (`bg-primary-soft`, `bg-success`, `bg-emergency`, `bg-warn`, `bg-muted`) — nada hardcoded.
+- Atualiza `src/integrations/supabase/types.ts` automaticamente após migração (Lovable).
 
-Confirma para eu implementar?
+---
+
+### 7. Fora do escopo
+
+- Notificações push de horário.
+- Auto-geração de logs `missed` (precisaria job/cron). `AdherenceCalendar` pinta vermelho apenas se já houver log com `status='missed'` registrado.
+- Edição em lote / scan de receita por IA.
