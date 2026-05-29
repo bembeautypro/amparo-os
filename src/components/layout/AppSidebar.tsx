@@ -8,19 +8,15 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
   const { activeFamily } = useFamilyContext();
   const familyId = activeFamily?.id;
 
-  const items = [
-    { to: "/dashboard", label: "Início", icon: Home, match: "/dashboard" },
-    {
-      to: familyId ? `/familia/${familyId}/medicamentos` : "/familia",
-      label: "Medicamentos",
-      icon: Pill,
-      match: "/medicamentos",
-      disabled: !familyId,
-    },
-    { to: "/agenda", label: "Agenda", icon: CalendarDays, match: "/agenda" },
-    { to: "/documentos", label: "Documentos", icon: FileText, match: "/documentos" },
-    { to: "/familia", label: "Família", icon: Users, match: "/familia" },
-  ] as const;
+  const linkClass = (active: boolean, disabled = false) =>
+    cn(
+      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+      active
+        ? "bg-primary-soft text-primary"
+        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+      collapsed && "justify-center px-0",
+      disabled && "pointer-events-none opacity-40",
+    );
 
   return (
     <aside
@@ -43,41 +39,77 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
 
       <nav className="flex-1 px-3 py-2">
         <ul className="space-y-1">
-          {items.map((item) => {
-            const active = pathname.includes(item.match);
-            const Icon = item.icon;
-            return (
-              <li key={item.label}>
-                <Link
-                  to={item.to}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                    active
-                      ? "bg-primary-soft text-primary"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                    collapsed && "justify-center px-0",
-                    item.disabled && "pointer-events-none opacity-40",
-                  )}
-                  title={collapsed ? item.label : undefined}
-                >
-                  <Icon className="h-5 w-5 shrink-0" />
-                  {!collapsed && <span>{item.label}</span>}
-                </Link>
-              </li>
-            );
-          })}
+          <li>
+            <Link
+              to="/dashboard"
+              className={linkClass(
+                pathname === "/dashboard" || pathname.startsWith("/dashboard/"),
+              )}
+              title={collapsed ? "Início" : undefined}
+            >
+              <Home className="h-5 w-5 shrink-0" />
+              {!collapsed && <span>Início</span>}
+            </Link>
+          </li>
+          <li>
+            {familyId ? (
+              <Link
+                to="/familia/$familyId/medicamentos"
+                params={{ familyId }}
+                className={linkClass(pathname.includes("/medicamentos"))}
+                title={collapsed ? "Medicamentos" : undefined}
+              >
+                <Pill className="h-5 w-5 shrink-0" />
+                {!collapsed && <span>Medicamentos</span>}
+              </Link>
+            ) : (
+              <span
+                className={linkClass(false, true)}
+                title={collapsed ? "Medicamentos" : undefined}
+              >
+                <Pill className="h-5 w-5 shrink-0" />
+                {!collapsed && <span>Medicamentos</span>}
+              </span>
+            )}
+          </li>
+          <li>
+            <Link
+              to="/agenda"
+              className={linkClass(pathname.startsWith("/agenda"))}
+              title={collapsed ? "Agenda" : undefined}
+            >
+              <CalendarDays className="h-5 w-5 shrink-0" />
+              {!collapsed && <span>Agenda</span>}
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/documentos"
+              className={linkClass(pathname.startsWith("/documentos"))}
+              title={collapsed ? "Documentos" : undefined}
+            >
+              <FileText className="h-5 w-5 shrink-0" />
+              {!collapsed && <span>Documentos</span>}
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/familia"
+              className={linkClass(
+                pathname === "/familia" || pathname.startsWith("/familia/"),
+              )}
+              title={collapsed ? "Família" : undefined}
+            >
+              <Users className="h-5 w-5 shrink-0" />
+              {!collapsed && <span>Família</span>}
+            </Link>
+          </li>
         </ul>
 
         <div className="mt-4 border-t border-border pt-4">
           <Link
             to="/perfil"
-            className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-              pathname.startsWith("/perfil")
-                ? "bg-primary-soft text-primary"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground",
-              collapsed && "justify-center px-0",
-            )}
+            className={linkClass(pathname.startsWith("/perfil"))}
             title={collapsed ? "Perfil" : undefined}
           >
             <User className="h-5 w-5 shrink-0" />
