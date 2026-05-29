@@ -1,13 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { QRCodeSVG, QRCodeCanvas } from "qrcode.react";
+import { QRCodeCanvas } from "qrcode.react";
 import {
   AlertTriangle,
-  Pill,
   Phone,
-  Hospital,
-  Heart,
-  X,
   Copy,
   Share2,
   Download,
