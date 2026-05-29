@@ -20,6 +20,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EmergenciaTokenRouteImport } from './routes/emergencia.$token'
+import { Route as ConviteTokenRouteImport } from './routes/convite.$token'
 import { Route as FamiliaFamilyIdMembrosRouteImport } from './routes/familia.$familyId.membros'
 import { Route as FamiliaFamilyIdMedicamentosRouteImport } from './routes/familia.$familyId.medicamentos'
 import { Route as FamiliaFamilyIdHistoricoRouteImport } from './routes/familia.$familyId.historico'
@@ -92,6 +93,11 @@ const EmergenciaTokenRoute = EmergenciaTokenRouteImport.update({
   id: '/$token',
   path: '/$token',
   getParentRoute: () => EmergenciaRoute,
+} as any)
+const ConviteTokenRoute = ConviteTokenRouteImport.update({
+  id: '/convite/$token',
+  path: '/convite/$token',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const FamiliaFamilyIdMembrosRoute = FamiliaFamilyIdMembrosRouteImport.update({
   id: '/$familyId/membros',
@@ -204,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/perfil': typeof PerfilRoute
   '/register': typeof RegisterRoute
+  '/convite/$token': typeof ConviteTokenRoute
   '/emergencia/$token': typeof EmergenciaTokenRoute
   '/familia/$familyId/agenda': typeof FamiliaFamilyIdAgendaRouteWithChildren
   '/familia/$familyId/documentos': typeof FamiliaFamilyIdDocumentosRouteWithChildren
@@ -234,6 +241,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/perfil': typeof PerfilRoute
   '/register': typeof RegisterRoute
+  '/convite/$token': typeof ConviteTokenRoute
   '/emergencia/$token': typeof EmergenciaTokenRoute
   '/familia/$familyId/agenda': typeof FamiliaFamilyIdAgendaRouteWithChildren
   '/familia/$familyId/documentos': typeof FamiliaFamilyIdDocumentosRouteWithChildren
@@ -265,6 +273,7 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/perfil': typeof PerfilRoute
   '/register': typeof RegisterRoute
+  '/convite/$token': typeof ConviteTokenRoute
   '/emergencia/$token': typeof EmergenciaTokenRoute
   '/familia/$familyId/agenda': typeof FamiliaFamilyIdAgendaRouteWithChildren
   '/familia/$familyId/documentos': typeof FamiliaFamilyIdDocumentosRouteWithChildren
@@ -297,6 +306,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/perfil'
     | '/register'
+    | '/convite/$token'
     | '/emergencia/$token'
     | '/familia/$familyId/agenda'
     | '/familia/$familyId/documentos'
@@ -327,6 +337,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/perfil'
     | '/register'
+    | '/convite/$token'
     | '/emergencia/$token'
     | '/familia/$familyId/agenda'
     | '/familia/$familyId/documentos'
@@ -357,6 +368,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/perfil'
     | '/register'
+    | '/convite/$token'
     | '/emergencia/$token'
     | '/familia/$familyId/agenda'
     | '/familia/$familyId/documentos'
@@ -388,6 +400,7 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   PerfilRoute: typeof PerfilRoute
   RegisterRoute: typeof RegisterRoute
+  ConviteTokenRoute: typeof ConviteTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -468,6 +481,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/emergencia/$token'
       preLoaderRoute: typeof EmergenciaTokenRouteImport
       parentRoute: typeof EmergenciaRoute
+    }
+    '/convite/$token': {
+      id: '/convite/$token'
+      path: '/convite/$token'
+      fullPath: '/convite/$token'
+      preLoaderRoute: typeof ConviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/familia/$familyId/membros': {
       id: '/familia/$familyId/membros'
@@ -757,6 +777,7 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   PerfilRoute: PerfilRoute,
   RegisterRoute: RegisterRoute,
+  ConviteTokenRoute: ConviteTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
