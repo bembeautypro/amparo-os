@@ -201,31 +201,75 @@ export type Database = {
           },
         ]
       }
+      medication_change_history: {
+        Row: {
+          changed_at: string
+          changed_by: string
+          field_changed: string
+          id: string
+          medication_id: string
+          new_value: string | null
+          old_value: string | null
+        }
+        Insert: {
+          changed_at?: string
+          changed_by: string
+          field_changed: string
+          id?: string
+          medication_id: string
+          new_value?: string | null
+          old_value?: string | null
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string
+          field_changed?: string
+          id?: string
+          medication_id?: string
+          new_value?: string | null
+          old_value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medication_change_history_medication_id_fkey"
+            columns: ["medication_id"]
+            isOneToOne: false
+            referencedRelation: "medications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       medication_logs: {
         Row: {
           created_at: string
           id: string
+          logged_by: string | null
           medication_id: string
           patient_id: string
           scheduled_for: string
+          status: string
           taken_at: string | null
           taken_by: string | null
         }
         Insert: {
           created_at?: string
           id?: string
+          logged_by?: string | null
           medication_id: string
           patient_id: string
           scheduled_for: string
+          status?: string
           taken_at?: string | null
           taken_by?: string | null
         }
         Update: {
           created_at?: string
           id?: string
+          logged_by?: string | null
           medication_id?: string
           patient_id?: string
           scheduled_for?: string
+          status?: string
           taken_at?: string | null
           taken_by?: string | null
         }
@@ -235,36 +279,54 @@ export type Database = {
         Row: {
           created_at: string
           dosage: string | null
+          end_date: string | null
+          form: string | null
           frequency: string | null
+          generic_name: string | null
           id: string
           name: string
           notes: string | null
           patient_id: string
+          photo_path: string | null
+          prescriber: string | null
           schedule: Json | null
+          start_date: string
           status: Database["public"]["Enums"]["medication_status"]
           updated_at: string
         }
         Insert: {
           created_at?: string
           dosage?: string | null
+          end_date?: string | null
+          form?: string | null
           frequency?: string | null
+          generic_name?: string | null
           id?: string
           name: string
           notes?: string | null
           patient_id: string
+          photo_path?: string | null
+          prescriber?: string | null
           schedule?: Json | null
+          start_date?: string
           status?: Database["public"]["Enums"]["medication_status"]
           updated_at?: string
         }
         Update: {
           created_at?: string
           dosage?: string | null
+          end_date?: string | null
+          form?: string | null
           frequency?: string | null
+          generic_name?: string | null
           id?: string
           name?: string
           notes?: string | null
           patient_id?: string
+          photo_path?: string | null
+          prescriber?: string | null
           schedule?: Json | null
+          start_date?: string
           status?: Database["public"]["Enums"]["medication_status"]
           updated_at?: string
         }
@@ -414,7 +476,7 @@ export type Database = {
       condition_status: "active" | "inactive"
       document_type: "prescription" | "exam" | "report" | "other"
       family_role: "admin" | "member" | "caregiver"
-      medication_status: "active" | "paused" | "archived"
+      medication_status: "active" | "paused" | "archived" | "ended"
       member_relation: "child" | "spouse" | "caregiver" | "other"
       member_status: "active" | "invited"
       severity_level: "low" | "medium" | "high"
@@ -550,7 +612,7 @@ export const Constants = {
       condition_status: ["active", "inactive"],
       document_type: ["prescription", "exam", "report", "other"],
       family_role: ["admin", "member", "caregiver"],
-      medication_status: ["active", "paused", "archived"],
+      medication_status: ["active", "paused", "archived", "ended"],
       member_relation: ["child", "spouse", "caregiver", "other"],
       member_status: ["active", "invited"],
       severity_level: ["low", "medium", "high"],
