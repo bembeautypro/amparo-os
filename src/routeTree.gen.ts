@@ -26,6 +26,7 @@ import { Route as FamiliaFamilyIdMedicamentosRouteImport } from './routes/famili
 import { Route as FamiliaFamilyIdHistoricoRouteImport } from './routes/familia.$familyId.historico'
 import { Route as FamiliaFamilyIdDocumentosRouteImport } from './routes/familia.$familyId.documentos'
 import { Route as FamiliaFamilyIdAgendaRouteImport } from './routes/familia.$familyId.agenda'
+import { Route as FamiliaFamilyIdPacientesPatientIdRouteImport } from './routes/familia.$familyId.pacientes.$patientId'
 import { Route as FamiliaFamilyIdMembrosAtividadeRouteImport } from './routes/familia.$familyId.membros.atividade'
 import { Route as FamiliaFamilyIdMedicamentosNovoRouteImport } from './routes/familia.$familyId.medicamentos.novo'
 import { Route as FamiliaFamilyIdMedicamentosMedIdRouteImport } from './routes/familia.$familyId.medicamentos.$medId'
@@ -127,6 +128,12 @@ const FamiliaFamilyIdAgendaRoute = FamiliaFamilyIdAgendaRouteImport.update({
   path: '/$familyId/agenda',
   getParentRoute: () => FamiliaRoute,
 } as any)
+const FamiliaFamilyIdPacientesPatientIdRoute =
+  FamiliaFamilyIdPacientesPatientIdRouteImport.update({
+    id: '/$familyId/pacientes/$patientId',
+    path: '/$familyId/pacientes/$patientId',
+    getParentRoute: () => FamiliaRoute,
+  } as any)
 const FamiliaFamilyIdMembrosAtividadeRoute =
   FamiliaFamilyIdMembrosAtividadeRouteImport.update({
     id: '/atividade',
@@ -226,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/familia/$familyId/medicamentos/$medId': typeof FamiliaFamilyIdMedicamentosMedIdRouteWithChildren
   '/familia/$familyId/medicamentos/novo': typeof FamiliaFamilyIdMedicamentosNovoRoute
   '/familia/$familyId/membros/atividade': typeof FamiliaFamilyIdMembrosAtividadeRoute
+  '/familia/$familyId/pacientes/$patientId': typeof FamiliaFamilyIdPacientesPatientIdRoute
   '/familia/$familyId/agenda/$id/editar': typeof FamiliaFamilyIdAgendaIdEditarRoute
   '/familia/$familyId/historico/$id/editar': typeof FamiliaFamilyIdHistoricoIdEditarRoute
   '/familia/$familyId/medicamentos/$medId/editar': typeof FamiliaFamilyIdMedicamentosMedIdEditarRoute
@@ -257,6 +265,7 @@ export interface FileRoutesByTo {
   '/familia/$familyId/medicamentos/$medId': typeof FamiliaFamilyIdMedicamentosMedIdRouteWithChildren
   '/familia/$familyId/medicamentos/novo': typeof FamiliaFamilyIdMedicamentosNovoRoute
   '/familia/$familyId/membros/atividade': typeof FamiliaFamilyIdMembrosAtividadeRoute
+  '/familia/$familyId/pacientes/$patientId': typeof FamiliaFamilyIdPacientesPatientIdRoute
   '/familia/$familyId/agenda/$id/editar': typeof FamiliaFamilyIdAgendaIdEditarRoute
   '/familia/$familyId/historico/$id/editar': typeof FamiliaFamilyIdHistoricoIdEditarRoute
   '/familia/$familyId/medicamentos/$medId/editar': typeof FamiliaFamilyIdMedicamentosMedIdEditarRoute
@@ -289,6 +298,7 @@ export interface FileRoutesById {
   '/familia/$familyId/medicamentos/$medId': typeof FamiliaFamilyIdMedicamentosMedIdRouteWithChildren
   '/familia/$familyId/medicamentos/novo': typeof FamiliaFamilyIdMedicamentosNovoRoute
   '/familia/$familyId/membros/atividade': typeof FamiliaFamilyIdMembrosAtividadeRoute
+  '/familia/$familyId/pacientes/$patientId': typeof FamiliaFamilyIdPacientesPatientIdRoute
   '/familia/$familyId/agenda/$id/editar': typeof FamiliaFamilyIdAgendaIdEditarRoute
   '/familia/$familyId/historico/$id/editar': typeof FamiliaFamilyIdHistoricoIdEditarRoute
   '/familia/$familyId/medicamentos/$medId/editar': typeof FamiliaFamilyIdMedicamentosMedIdEditarRoute
@@ -322,6 +332,7 @@ export interface FileRouteTypes {
     | '/familia/$familyId/medicamentos/$medId'
     | '/familia/$familyId/medicamentos/novo'
     | '/familia/$familyId/membros/atividade'
+    | '/familia/$familyId/pacientes/$patientId'
     | '/familia/$familyId/agenda/$id/editar'
     | '/familia/$familyId/historico/$id/editar'
     | '/familia/$familyId/medicamentos/$medId/editar'
@@ -353,6 +364,7 @@ export interface FileRouteTypes {
     | '/familia/$familyId/medicamentos/$medId'
     | '/familia/$familyId/medicamentos/novo'
     | '/familia/$familyId/membros/atividade'
+    | '/familia/$familyId/pacientes/$patientId'
     | '/familia/$familyId/agenda/$id/editar'
     | '/familia/$familyId/historico/$id/editar'
     | '/familia/$familyId/medicamentos/$medId/editar'
@@ -384,6 +396,7 @@ export interface FileRouteTypes {
     | '/familia/$familyId/medicamentos/$medId'
     | '/familia/$familyId/medicamentos/novo'
     | '/familia/$familyId/membros/atividade'
+    | '/familia/$familyId/pacientes/$patientId'
     | '/familia/$familyId/agenda/$id/editar'
     | '/familia/$familyId/historico/$id/editar'
     | '/familia/$familyId/medicamentos/$medId/editar'
@@ -522,6 +535,13 @@ declare module '@tanstack/react-router' {
       path: '/$familyId/agenda'
       fullPath: '/familia/$familyId/agenda'
       preLoaderRoute: typeof FamiliaFamilyIdAgendaRouteImport
+      parentRoute: typeof FamiliaRoute
+    }
+    '/familia/$familyId/pacientes/$patientId': {
+      id: '/familia/$familyId/pacientes/$patientId'
+      path: '/$familyId/pacientes/$patientId'
+      fullPath: '/familia/$familyId/pacientes/$patientId'
+      preLoaderRoute: typeof FamiliaFamilyIdPacientesPatientIdRouteImport
       parentRoute: typeof FamiliaRoute
     }
     '/familia/$familyId/membros/atividade': {
@@ -752,6 +772,7 @@ interface FamiliaRouteChildren {
   FamiliaFamilyIdHistoricoRoute: typeof FamiliaFamilyIdHistoricoRouteWithChildren
   FamiliaFamilyIdMedicamentosRoute: typeof FamiliaFamilyIdMedicamentosRouteWithChildren
   FamiliaFamilyIdMembrosRoute: typeof FamiliaFamilyIdMembrosRouteWithChildren
+  FamiliaFamilyIdPacientesPatientIdRoute: typeof FamiliaFamilyIdPacientesPatientIdRoute
 }
 
 const FamiliaRouteChildren: FamiliaRouteChildren = {
@@ -761,6 +782,8 @@ const FamiliaRouteChildren: FamiliaRouteChildren = {
   FamiliaFamilyIdMedicamentosRoute:
     FamiliaFamilyIdMedicamentosRouteWithChildren,
   FamiliaFamilyIdMembrosRoute: FamiliaFamilyIdMembrosRouteWithChildren,
+  FamiliaFamilyIdPacientesPatientIdRoute:
+    FamiliaFamilyIdPacientesPatientIdRoute,
 }
 
 const FamiliaRouteWithChildren =
