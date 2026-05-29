@@ -1,64 +1,89 @@
-## Revisão do Prompt 1
+## Plano — Migrar Design System para "Cuida / Acolhimento"
 
-Verifiquei item a item o que foi implementado contra o que você pediu. Algumas coisas estão corretas, mas há **4 desvios reais** do briefing original.
+O Handoff define um sistema completamente diferente do que está hoje: paleta **creme + teal escuro + alert tijolo** (warm), tipografia **Plus Jakarta Sans**, raios mais arredondados (card = 22px, pill = 999), spacing em grid de 8pt e tipografia tokenizada (display → eyebrow). Hoje o app usa azul-600 + cinzas + Inter — vai ser uma troca visual grande, mas estrutural e reaproveitável porque mantemos os nomes semânticos do Tailwind/shadcn (`--primary`, `--background`, `--card`, etc.).
 
-### ✅ O que está correto
-- Cliente Supabase configurado (`src/integrations/supabase/client.ts`)
-- `AuthContext` com `useAuth()` expondo `user`, `session`, `loading`, `signIn`, `signUp`, `signOut` (+ `signInWithGoogle`)
-- `ProtectedRoute` redirecionando para `/login`
-- Rotas `/login` e `/register` com validação, incluindo botão Google
-- Rota `/` redirecionando conforme autenticação
-- Paleta, tipografia e tom seguindo o briefing
-- `useFamilyContext()` mantendo família e paciente ativos
+### Escopo
+- Apenas tokens, fonte e ajustes mínimos em componentes de layout que referenciam cores específicas.
+- Sem mexer em rotas, lógica, schema, auth ou conteúdo das telas.
+- Sem dark mode nesta passada (o Handoff só especifica um tema).
 
-### ❌ Desvios encontrados
+### 1. Fonte: Plus Jakarta Sans
+- `bun add @fontsource-variable/plus-jakarta-sans`
+- Importar no topo de `src/styles.css` (`@import "@fontsource-variable/plus-jakarta-sans"`).
+- Definir `font-family` base em `html, body` no `@layer base`.
 
-**1. Bottom nav e Sidebar estão com itens errados**
-Você pediu: `Início | Medicamentos | Agenda | Documentos | Família` (com Perfil só pelo avatar do header).
-Está hoje: `Início | Agenda | Documentos | Família | Perfil` — falta **Medicamentos** e **Perfil** está indevidamente na nav.
+### 2. Reescrever `:root` em `src/styles.css` com os tokens do Handoff
 
-**2. Header tem botão de Emergência (vermelho)**
-Você foi explícito: "NÃO incluir botão de emergência no header — ele fica apenas no dashboard". O `AppHeader` tem um botão `Emergência` vermelho no canto superior direito.
+Cores (convertidas para oklch dentro do `:root`, conforme regra do template):
 
-**3. `useFamilyContext` não persiste em localStorage**
-Briefing: "persiste no localStorage para sobreviver a reloads". Hoje, `activeFamily` e `activePatient` vivem só em `useState` — ao recarregar, voltam para o primeiro da lista.
+| Token shadcn          | Handoff source                | Valor                |
+|-----------------------|-------------------------------|----------------------|
+| `--background`        | `--c-bg` creme claro          | `#fffaf2`            |
+| `--foreground`        | `--c-text` near-black quente  | `#262525`            |
+| `--card`              | branco                        | `#ffffff`            |
+| `--popover`           | branco                        | `#ffffff`            |
+| `--primary`           | `--c-accent` teal escuro      | `#01373D`            |
+| `--primary-foreground`| `--c-accent-fg` creme         | `#FEF3E1`            |
+| `--primary-soft`      | `--c-accent-soft`             | `#D4E8E6`            |
+| `--secondary`         | `--c-surface` linho           | `#FEF3E1`            |
+| `--secondary-foreground` | text                       | `#262525`            |
+| `--muted`             | surface                       | `#FEF3E1`            |
+| `--muted-foreground`  | text-soft                     | `rgba(38,37,37,.68)` |
+| `--accent`            | accent-soft (hover sutil)     | `#D4E8E6`            |
+| `--accent-foreground` | accent                        | `#01373D`            |
+| `--border`            | line                          | `rgba(38,37,37,.10)` |
+| `--input`             | line                          | `rgba(38,37,37,.10)` |
+| `--ring`              | accent                        | `#01373D`            |
+| `--sidebar`           | text (sidebar escura)         | `#262525`            |
+| `--sidebar-foreground`| accent-fg                     | `#FEF3E1`            |
+| `--sidebar-accent`    | rgba(254,243,225,.12)         | (translúcido sobre escuro) |
+| `--sidebar-border`    | rgba(254,243,225,.08)         |                      |
+| `--destructive` / `--emergency` | `--c-alert` tijolo  | `#AA3C26`            |
+| `--emergency-soft`    | `--c-alert-soft`              | `#FCE0D5`            |
 
-**4. Stack: React Router DOM vs TanStack Router**
-O briefing pediu `React Router DOM`, mas o template Lovable é fixado em **TanStack Router** (file-based routing em `src/routes/`). Trocar a stack quebraria todo o app. Recomendo manter TanStack Router e tratar isso como adaptação obrigatória da plataforma — **não vou trocar**, apenas registro.
+Tokens novos (adicionar ao `@theme inline` para virarem classes Tailwind):
+- `--color-success: #236444` + `--color-success-soft: #DAEBDE`
+- `--color-warn: #B46E1E` + `--color-warn-soft: #FDE9C8`
 
-### Observações menores (não bloqueantes)
-- Rota `/familia/:familyId/*` existe como rotas planas (`familia.$familyId.medicamentos.tsx` etc.) — correto no padrão TanStack.
-- Rotas públicas `/emergencia/:token` e `/convite/:token` ainda não existem (mas o briefing disse "implementar depois", então OK).
+Raios — substituir o sistema atual por:
+- `--radius: 1.375rem` (22px = card padrão)
+- Manter aliases shadcn `--radius-sm/md/lg/xl/2xl` ajustando o `calc()` para bater com 10/14/19/22/28.
+
+Spacing/typography — adicionar como CSS variables livres (`--s-1` … `--s-9`, `--fs-display`…`--fs-xs`) para uso pontual; **não** sobrescrevemos a escala do Tailwind para evitar regressão em todo o app.
+
+### 3. Sidebar dark (mudança visual notável)
+
+O Handoff define a sidebar com fundo `--c-text` (quase preto quente) e textos creme. Como o app já consome `--sidebar` / `--sidebar-foreground`, basta trocar os valores desses tokens — `src/components/layout/AppSidebar.tsx` continua igual.
+
+Único ajuste no componente: o logo hoje usa `bg-primary text-primary-foreground` (vira teal sobre creme), o que fica bom; e os itens ativos usam `bg-primary-soft text-primary`. Com sidebar dark, esses tokens precisam de override local: trocar por `data-[active]:bg-white/10 data-[active]:text-[color:var(--sidebar-foreground)]` ou similar. Vou ajustar dentro do próprio componente sem criar tokens extras.
+
+### 4. Header e bottom-nav
+
+- `AppHeader` permanece em `bg-background/85` (creme) — fica coerente.
+- `BottomNav` continua em `bg-card/95` (branco) — coerente.
+- Estados ativos hoje usam `text-primary` (= teal). Nada a mudar no JSX.
+
+### 5. Botões / cartões — herdam automaticamente
+
+Componentes shadcn (`Button`, `Card`, `Badge`, `Input`, `Dialog`, etc.) consomem os tokens semânticos. Trocando o `:root`, eles ganham a nova paleta sem edit. Spot-check visual depois para garantir contraste em variantes (`outline`, `ghost`, `secondary`).
+
+### 6. Pontos que vou validar após a troca
+
+- Telas `/login` e `/register`: o `AuthShell` provavelmente usa cores específicas — vou checar e ajustar se preciso.
+- `/dashboard`, `/emergencia`, onboarding: garantir que badges e CTAs de severidade usem `--emergency` (crítico), e que possamos introduzir `--color-warn` / `--color-success` onde hoje há `text-red-500` / `text-green-600` hardcoded (se houver).
+- Procurar e remover qualquer classe Tailwind de cor hardcoded (`bg-blue-*`, `text-red-*`, `bg-gray-*`) em componentes do app, substituindo por tokens semânticos.
+
+### 7. Memória do projeto
+
+Após aplicar, registro em `mem://index.md` (Core) as decisões de paleta/tipografia para que mudanças futuras não voltem ao azul/Inter.
 
 ---
 
-## Plano de correção
+### Arquivos que vou tocar
+- `src/styles.css` — reescrita do `:root`, `@theme inline` (novos tokens) e `@layer base` (font-family).
+- `package.json` (via `bun add`) — fonte Plus Jakarta Sans.
+- `src/components/layout/AppSidebar.tsx` — ajuste mínimo nas classes do item ativo para combinar com sidebar dark.
+- Eventuais ajustes pontuais em componentes com cor hardcoded encontrada na varredura.
+- `mem://index.md` — registrar paleta + fonte como regras Core.
 
-Mudanças apenas em frontend/contexto, sem mexer em backend nem em módulos.
-
-### 1. Corrigir itens da navegação
-Arquivo: `src/components/layout/BottomNav.tsx` e `src/components/layout/AppSidebar.tsx`
-
-- Substituir array de items pelos 5 corretos: `Início`, `Medicamentos`, `Agenda`, `Documentos`, `Família`.
-- `Medicamentos` aponta para `/familia/$familyId/medicamentos` usando o `activeFamily.id` do `useFamilyContext` (fallback desabilitado se não houver família).
-- No `AppSidebar` (desktop), adicionar um link separado para `/perfil` abaixo dos 5 principais, conforme o briefing ("mesmos 5 itens + link para Perfil").
-- No `BottomNav` (mobile), remover `Perfil` — acesso via avatar do header.
-
-### 2. Remover botão de Emergência do header
-Arquivo: `src/components/layout/AppHeader.tsx`
-
-- Remover o `<Button asChild>` com `<Link to="/emergencia">` e o ícone `PhoneCall`.
-- Manter avatar do usuário e seletor de paciente.
-- Garantir que o Dashboard (`src/routes/dashboard.tsx`) ainda exponha o atalho de emergência (já existe lá, então nada a adicionar — só validar).
-
-### 3. Persistir família/paciente ativos em localStorage
-Arquivo: `src/contexts/FamilyContext.tsx`
-
-- Ao inicializar `activeFamily` / `activePatient`, hidratar a partir de `localStorage` (`amparo:active-family-id`, `amparo:active-patient-id`).
-- Quando as queries de `families`/`patients` carregarem, escolher o ativo na ordem: ID salvo no localStorage (se ainda existir na lista) → primeiro item da lista → null.
-- Em `setActiveFamily` / `setActivePatient`, gravar o ID no localStorage (ou remover quando null).
-- Trocar de família deve limpar o paciente salvo se ele não pertencer mais à família ativa.
-
-### 4. Sem mudanças de banco, sem mudanças de auth, sem mexer em outras rotas.
-
-Posso aplicar essas correções na sequência assim que você aprovar.
+Sem mudanças em backend, rotas, contextos ou módulos. Pode aprovar?
