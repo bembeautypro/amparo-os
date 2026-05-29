@@ -92,6 +92,12 @@ export function OnboardingFlow() {
       if (error) throw error;
 
       setPatientId(pat.id);
+      setActivePatient({
+        id: pat.id,
+        family_id: familyId,
+        full_name: data.fullName,
+        photo_url: photoUrl,
+      });
       setStep(4);
     } catch (err: any) {
       toast.error("Não foi possível adicionar o familiar", { description: err.message });
