@@ -140,14 +140,20 @@ export type Database = {
           appointment_id: string | null
           clinical_event_id: string | null
           created_at: string
+          deleted_at: string | null
           doc_type: Database["public"]["Enums"]["document_type"]
+          doctor_name: string | null
+          document_date: string | null
           exam_date: string | null
+          expiry_date: string | null
           file_path: string
           file_size: number | null
           id: string
+          institution: string | null
           mime_type: string | null
           notes: string | null
           patient_id: string
+          tags: string[]
           title: string
           updated_at: string
         }
@@ -155,14 +161,20 @@ export type Database = {
           appointment_id?: string | null
           clinical_event_id?: string | null
           created_at?: string
+          deleted_at?: string | null
           doc_type?: Database["public"]["Enums"]["document_type"]
+          doctor_name?: string | null
+          document_date?: string | null
           exam_date?: string | null
+          expiry_date?: string | null
           file_path: string
           file_size?: number | null
           id?: string
+          institution?: string | null
           mime_type?: string | null
           notes?: string | null
           patient_id: string
+          tags?: string[]
           title: string
           updated_at?: string
         }
@@ -170,14 +182,20 @@ export type Database = {
           appointment_id?: string | null
           clinical_event_id?: string | null
           created_at?: string
+          deleted_at?: string | null
           doc_type?: Database["public"]["Enums"]["document_type"]
+          doctor_name?: string | null
+          document_date?: string | null
           exam_date?: string | null
+          expiry_date?: string | null
           file_path?: string
           file_size?: number | null
           id?: string
+          institution?: string | null
           mime_type?: string | null
           notes?: string | null
           patient_id?: string
+          tags?: string[]
           title?: string
           updated_at?: string
         }
@@ -619,7 +637,16 @@ export type Database = {
         | "family_observation"
       clinical_severity: "low" | "medium" | "high" | "critical"
       condition_status: "active" | "inactive"
-      document_type: "prescription" | "exam" | "report" | "other"
+      document_type:
+        | "prescription"
+        | "exam"
+        | "report"
+        | "other"
+        | "medical_order"
+        | "insurance_card"
+        | "personal_doc"
+        | "hospital_discharge"
+        | "vaccine"
       family_role: "admin" | "member" | "caregiver"
       medication_status: "active" | "paused" | "archived" | "ended"
       member_relation: "child" | "spouse" | "caregiver" | "other"
@@ -781,7 +808,17 @@ export const Constants = {
       ],
       clinical_severity: ["low", "medium", "high", "critical"],
       condition_status: ["active", "inactive"],
-      document_type: ["prescription", "exam", "report", "other"],
+      document_type: [
+        "prescription",
+        "exam",
+        "report",
+        "other",
+        "medical_order",
+        "insurance_card",
+        "personal_doc",
+        "hospital_discharge",
+        "vaccine",
+      ],
       family_role: ["admin", "member", "caregiver"],
       medication_status: ["active", "paused", "archived", "ended"],
       member_relation: ["child", "spouse", "caregiver", "other"],
