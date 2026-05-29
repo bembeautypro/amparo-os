@@ -8,6 +8,7 @@ import { StepPatient, type StepPatientData } from "./steps/StepPatient";
 import { StepCritical, type StepCriticalData } from "./steps/StepCritical";
 import { StepFirstAction } from "./steps/StepFirstAction";
 import { useAuth } from "@/contexts/AuthContext";
+import { useFamilyContext } from "@/contexts/FamilyContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
