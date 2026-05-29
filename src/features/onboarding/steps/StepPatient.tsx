@@ -111,14 +111,37 @@ export function StepPatient({
         <div className="grid gap-5 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label htmlFor="birth">Data de nascimento</Label>
-            <Input
-              id="birth"
-              type="date"
-              value={birthDate}
-              onChange={(e) => setBirthDate(e.target.value)}
-              max={new Date().toISOString().slice(0, 10)}
-              className="h-11"
-            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  id="birth"
+                  type="button"
+                  variant="outline"
+                  className={cn(
+                    "h-11 w-full justify-start text-left font-normal",
+                    !birthDate && "text-muted-foreground",
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4 opacity-70" />
+                  {birthDate
+                    ? format(birthDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+                    : "Selecionar data"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={birthDate}
+                  onSelect={setBirthDate}
+                  captionLayout="dropdown"
+                  defaultMonth={birthDate ?? new Date(1980, 0)}
+                  disabled={(d) => d > new Date() || d < new Date("1900-01-01")}
+                  initialFocus
+                  locale={ptBR}
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="kinship">Grau de parentesco</Label>
