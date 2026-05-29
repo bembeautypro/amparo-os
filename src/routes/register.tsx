@@ -9,12 +9,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/register")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    invite: typeof s.invite === "string" ? s.invite : undefined,
+  }),
   component: RegisterPage,
 });
 
 function RegisterPage() {
   const { signUp } = useAuth();
   const navigate = useNavigate();
+  const { invite } = Route.useSearch();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,7 +42,11 @@ function RegisterPage() {
       return;
     }
     toast.success("Conta criada! Confira seu email para confirmar.");
-    navigate({ to: "/login" });
+    if (invite) {
+      navigate({ to: "/login", search: { invite } });
+    } else {
+      navigate({ to: "/login" });
+    }
   }
 
   return (
