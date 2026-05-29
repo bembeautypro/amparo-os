@@ -9,6 +9,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/register")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    invite: typeof s.invite === "string" ? s.invite : undefined,
+  }),
   component: RegisterPage,
 });
 
