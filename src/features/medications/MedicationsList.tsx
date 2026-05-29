@@ -89,24 +89,27 @@ function StatusPanel({
   }
 
   if (!q.data || q.data.length === 0) {
-    const empty: Record<MedicationStatus, { title: string; desc: string }> = {
+    const empty: Record<MedicationStatus, { title: string; desc: string; cta: string }> = {
       active: {
-        title: "Nenhum medicamento ativo",
-        desc: "Cadastre um medicamento para começar a acompanhar.",
+        title: "Nenhum medicamento cadastrado ainda.",
+        desc: "Cadastre um medicamento para começar a acompanhar doses e horários.",
+        cta: "Cadastrar primeiro",
       },
       paused: {
         title: "Nenhum medicamento pausado",
         desc: "Tratamentos pausados aparecem aqui.",
+        cta: "Cadastrar medicamento",
       },
       ended: {
         title: "Nenhum medicamento encerrado",
         desc: "Tratamentos finalizados ficam arquivados aqui.",
+        cta: "Cadastrar medicamento",
       },
-      archived: { title: "Vazio", desc: "" },
+      archived: { title: "Vazio", desc: "", cta: "" },
     };
     return (
       <EmptyState
-        icon={Pill}
+        illustration={<PillsEmpty />}
         title={empty[status].title}
         description={empty[status].desc}
         action={
@@ -116,7 +119,7 @@ function StatusPanel({
                 to="/familia/$familyId/medicamentos/novo"
                 params={{ familyId }}
               >
-                Adicionar medicamento
+                {empty[status].cta}
               </Link>
             </Button>
           ) : undefined
