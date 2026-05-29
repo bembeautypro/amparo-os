@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Menu, ChevronDown, Check, Plus } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { PatientAvatarImage } from "@/components/PatientAvatarImage";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -50,9 +51,10 @@ export function AppHeader({ onToggleSidebar }: { onToggleSidebar: () => void }) 
           <DropdownMenuTrigger asChild>
             <button className="flex min-w-0 items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-muted">
               <Avatar className="h-9 w-9">
-                {activePatient?.avatarUrl && (
-                  <AvatarImage src={activePatient.avatarUrl} alt={activePatient.name} />
-                )}
+                <PatientAvatarImage
+                  path={activePatient?.avatarUrl}
+                  alt={activePatient?.name ?? ""}
+                />
                 <AvatarFallback className="bg-primary-soft text-primary text-sm font-semibold">
                   {initials(activePatient?.name)}
                 </AvatarFallback>
@@ -82,7 +84,7 @@ export function AppHeader({ onToggleSidebar }: { onToggleSidebar: () => void }) 
                   className="gap-2"
                 >
                   <Avatar className="h-7 w-7">
-                    {p.avatarUrl && <AvatarImage src={p.avatarUrl} alt={p.name} />}
+                    <PatientAvatarImage path={p.avatarUrl} alt={p.name} />
                     <AvatarFallback className="bg-primary-soft text-primary text-[11px] font-semibold">
                       {initials(p.name)}
                     </AvatarFallback>

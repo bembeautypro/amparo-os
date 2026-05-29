@@ -66,16 +66,18 @@ export function OnboardingFlow() {
     if (!user || !familyId) return;
     setLoading(true);
     try {
-      let photoUrl: string | null = null;
+      let photoPath: string | null = null;
 
       if (data.photoFile) {
         const ext = data.photoFile.name.split(".").pop() ?? "jpg";
-        const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+        // Path MUST start with familyId — storage RLS uses the first folder
+        // to check family membership.
+        const path = `${familyId}/${crypto.randomUUID()}.${ext}`;
         const { error: upErr } = await supabase.storage
           .from("patient-photos")
           .upload(path, data.photoFile, { upsert: false });
         if (upErr) throw upErr;
-        photoUrl = supabase.storage.from("patient-photos").getPublicUrl(path).data.publicUrl;
+        photoPath = path;
       }
 
       const { data: pat, error } = await supabase
@@ -85,7 +87,7 @@ export function OnboardingFlow() {
           full_name: data.fullName,
           birth_date: data.birthDate || null,
           relation: data.relation || null,
-          photo_url: photoUrl,
+          photo_url: photoPath,
         })
         .select("id")
         .single();
@@ -97,7 +99,7 @@ export function OnboardingFlow() {
         family_id: familyId,
         name: data.fullName,
         relation: data.relation || null,
-        avatarUrl: photoUrl,
+        avatarUrl: photoPath,
       });
       setStep(4);
     } catch (err: any) {

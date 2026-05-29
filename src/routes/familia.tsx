@@ -5,7 +5,8 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { PatientAvatarImage } from "@/components/PatientAvatarImage";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState, PageHeader } from "@/components/ui-extras";
 import { useFamilyContext } from "@/contexts/FamilyContext";
@@ -91,7 +92,7 @@ function FamilyPage() {
               >
                 <div className="flex items-center gap-4">
                   <Avatar className="h-14 w-14">
-                    {p.avatarUrl && <AvatarImage src={p.avatarUrl} alt={p.name} />}
+                    <PatientAvatarImage path={p.avatarUrl} alt={p.name} />
                     <AvatarFallback className="bg-primary-soft text-primary text-base font-semibold">
                       {p.name
                         .split(" ")
