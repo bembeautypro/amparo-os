@@ -20,6 +20,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EmergenciaTokenRouteImport } from './routes/emergencia.$token'
+import { Route as FamiliaFamilyIdMembrosRouteImport } from './routes/familia.$familyId.membros'
 import { Route as FamiliaFamilyIdMedicamentosRouteImport } from './routes/familia.$familyId.medicamentos'
 import { Route as FamiliaFamilyIdHistoricoRouteImport } from './routes/familia.$familyId.historico'
 import { Route as FamiliaFamilyIdDocumentosRouteImport } from './routes/familia.$familyId.documentos'
@@ -90,6 +91,11 @@ const EmergenciaTokenRoute = EmergenciaTokenRouteImport.update({
   id: '/$token',
   path: '/$token',
   getParentRoute: () => EmergenciaRoute,
+} as any)
+const FamiliaFamilyIdMembrosRoute = FamiliaFamilyIdMembrosRouteImport.update({
+  id: '/$familyId/membros',
+  path: '/$familyId/membros',
+  getParentRoute: () => FamiliaRoute,
 } as any)
 const FamiliaFamilyIdMedicamentosRoute =
   FamiliaFamilyIdMedicamentosRouteImport.update({
@@ -196,6 +202,7 @@ export interface FileRoutesByFullPath {
   '/familia/$familyId/documentos': typeof FamiliaFamilyIdDocumentosRouteWithChildren
   '/familia/$familyId/historico': typeof FamiliaFamilyIdHistoricoRouteWithChildren
   '/familia/$familyId/medicamentos': typeof FamiliaFamilyIdMedicamentosRouteWithChildren
+  '/familia/$familyId/membros': typeof FamiliaFamilyIdMembrosRoute
   '/familia/$familyId/agenda/$id': typeof FamiliaFamilyIdAgendaIdRouteWithChildren
   '/familia/$familyId/agenda/novo': typeof FamiliaFamilyIdAgendaNovoRoute
   '/familia/$familyId/documentos/$id': typeof FamiliaFamilyIdDocumentosIdRoute
@@ -224,6 +231,7 @@ export interface FileRoutesByTo {
   '/familia/$familyId/documentos': typeof FamiliaFamilyIdDocumentosRouteWithChildren
   '/familia/$familyId/historico': typeof FamiliaFamilyIdHistoricoRouteWithChildren
   '/familia/$familyId/medicamentos': typeof FamiliaFamilyIdMedicamentosRouteWithChildren
+  '/familia/$familyId/membros': typeof FamiliaFamilyIdMembrosRoute
   '/familia/$familyId/agenda/$id': typeof FamiliaFamilyIdAgendaIdRouteWithChildren
   '/familia/$familyId/agenda/novo': typeof FamiliaFamilyIdAgendaNovoRoute
   '/familia/$familyId/documentos/$id': typeof FamiliaFamilyIdDocumentosIdRoute
@@ -253,6 +261,7 @@ export interface FileRoutesById {
   '/familia/$familyId/documentos': typeof FamiliaFamilyIdDocumentosRouteWithChildren
   '/familia/$familyId/historico': typeof FamiliaFamilyIdHistoricoRouteWithChildren
   '/familia/$familyId/medicamentos': typeof FamiliaFamilyIdMedicamentosRouteWithChildren
+  '/familia/$familyId/membros': typeof FamiliaFamilyIdMembrosRoute
   '/familia/$familyId/agenda/$id': typeof FamiliaFamilyIdAgendaIdRouteWithChildren
   '/familia/$familyId/agenda/novo': typeof FamiliaFamilyIdAgendaNovoRoute
   '/familia/$familyId/documentos/$id': typeof FamiliaFamilyIdDocumentosIdRoute
@@ -283,6 +292,7 @@ export interface FileRouteTypes {
     | '/familia/$familyId/documentos'
     | '/familia/$familyId/historico'
     | '/familia/$familyId/medicamentos'
+    | '/familia/$familyId/membros'
     | '/familia/$familyId/agenda/$id'
     | '/familia/$familyId/agenda/novo'
     | '/familia/$familyId/documentos/$id'
@@ -311,6 +321,7 @@ export interface FileRouteTypes {
     | '/familia/$familyId/documentos'
     | '/familia/$familyId/historico'
     | '/familia/$familyId/medicamentos'
+    | '/familia/$familyId/membros'
     | '/familia/$familyId/agenda/$id'
     | '/familia/$familyId/agenda/novo'
     | '/familia/$familyId/documentos/$id'
@@ -339,6 +350,7 @@ export interface FileRouteTypes {
     | '/familia/$familyId/documentos'
     | '/familia/$familyId/historico'
     | '/familia/$familyId/medicamentos'
+    | '/familia/$familyId/membros'
     | '/familia/$familyId/agenda/$id'
     | '/familia/$familyId/agenda/novo'
     | '/familia/$familyId/documentos/$id'
@@ -443,6 +455,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/emergencia/$token'
       preLoaderRoute: typeof EmergenciaTokenRouteImport
       parentRoute: typeof EmergenciaRoute
+    }
+    '/familia/$familyId/membros': {
+      id: '/familia/$familyId/membros'
+      path: '/$familyId/membros'
+      fullPath: '/familia/$familyId/membros'
+      preLoaderRoute: typeof FamiliaFamilyIdMembrosRouteImport
+      parentRoute: typeof FamiliaRoute
     }
     '/familia/$familyId/medicamentos': {
       id: '/familia/$familyId/medicamentos'
@@ -678,6 +697,7 @@ interface FamiliaRouteChildren {
   FamiliaFamilyIdDocumentosRoute: typeof FamiliaFamilyIdDocumentosRouteWithChildren
   FamiliaFamilyIdHistoricoRoute: typeof FamiliaFamilyIdHistoricoRouteWithChildren
   FamiliaFamilyIdMedicamentosRoute: typeof FamiliaFamilyIdMedicamentosRouteWithChildren
+  FamiliaFamilyIdMembrosRoute: typeof FamiliaFamilyIdMembrosRoute
 }
 
 const FamiliaRouteChildren: FamiliaRouteChildren = {
@@ -686,6 +706,7 @@ const FamiliaRouteChildren: FamiliaRouteChildren = {
   FamiliaFamilyIdHistoricoRoute: FamiliaFamilyIdHistoricoRouteWithChildren,
   FamiliaFamilyIdMedicamentosRoute:
     FamiliaFamilyIdMedicamentosRouteWithChildren,
+  FamiliaFamilyIdMembrosRoute: FamiliaFamilyIdMembrosRoute,
 }
 
 const FamiliaRouteWithChildren =
@@ -706,3 +727,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
