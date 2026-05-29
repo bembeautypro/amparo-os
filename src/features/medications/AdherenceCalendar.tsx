@@ -1,4 +1,4 @@
-import { format, eachDayOfInterval, subDays, startOfDay, isAfter, isBefore } from "date-fns";
+import { format, eachDayOfInterval, subDays, startOfDay, isBefore } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import type { MedicationLog } from "./types";
