@@ -18,7 +18,10 @@ export type Database = {
         Row: {
           accessed_at: string
           action: string
+          actor_user_id: string | null
+          details: Json | null
           emergency_link_id: string | null
+          family_id: string | null
           id: string
           ip: string | null
           patient_id: string | null
@@ -27,7 +30,10 @@ export type Database = {
         Insert: {
           accessed_at?: string
           action: string
+          actor_user_id?: string | null
+          details?: Json | null
           emergency_link_id?: string | null
+          family_id?: string | null
           id?: string
           ip?: string | null
           patient_id?: string | null
@@ -36,13 +42,24 @@ export type Database = {
         Update: {
           accessed_at?: string
           action?: string
+          actor_user_id?: string | null
+          details?: Json | null
           emergency_link_id?: string | null
+          family_id?: string | null
           id?: string
           ip?: string | null
           patient_id?: string | null
           user_agent?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "access_logs_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       appointments: {
         Row: {
@@ -378,6 +395,59 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "family_members_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          family_id: string
+          id: string
+          invited_by: string
+          role: Database["public"]["Enums"]["family_role"]
+          status: Database["public"]["Enums"]["invitation_status"]
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          family_id: string
+          id?: string
+          invited_by: string
+          role?: Database["public"]["Enums"]["family_role"]
+          status?: Database["public"]["Enums"]["invitation_status"]
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          family_id?: string
+          id?: string
+          invited_by?: string
+          role?: Database["public"]["Enums"]["family_role"]
+          status?: Database["public"]["Enums"]["invitation_status"]
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_family_id_fkey"
             columns: ["family_id"]
             isOneToOne: false
             referencedRelation: "families"
@@ -723,6 +793,7 @@ export type Database = {
         | "editor"
         | "viewer"
         | "doctor"
+      invitation_status: "pending" | "accepted" | "expired" | "cancelled"
       medication_status: "active" | "paused" | "archived" | "ended"
       member_relation: "child" | "spouse" | "caregiver" | "other"
       member_status: "active" | "invited"
@@ -902,6 +973,7 @@ export const Constants = {
         "viewer",
         "doctor",
       ],
+      invitation_status: ["pending", "accepted", "expired", "cancelled"],
       medication_status: ["active", "paused", "archived", "ended"],
       member_relation: ["child", "spouse", "caregiver", "other"],
       member_status: ["active", "invited"],
