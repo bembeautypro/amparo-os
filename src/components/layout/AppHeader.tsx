@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Menu, PhoneCall, ChevronDown, Check, Plus } from "lucide-react";
+import { Menu, ChevronDown, Check, Plus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -114,15 +114,7 @@ export function AppHeader({ onToggleSidebar }: { onToggleSidebar: () => void }) 
         </DropdownMenu>
 
         <div className="ml-auto flex items-center gap-2">
-          <Button
-            asChild
-            className="h-10 gap-2 rounded-full bg-emergency px-3 text-emergency-foreground shadow-soft hover:bg-emergency/90 sm:px-4"
-          >
-            <Link to="/emergencia">
-              <PhoneCall className="h-4 w-4" />
-              <span className="hidden sm:inline">Emergência</span>
-            </Link>
-          </Button>
+
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

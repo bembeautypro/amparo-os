@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,10 +24,42 @@ type FamilyContextValue = {
 
 const FamilyContext = createContext<FamilyContextValue | undefined>(undefined);
 
+const FAMILY_KEY = "amparo:active-family-id";
+const PATIENT_KEY = "amparo:active-patient-id";
+
+function readStorage(key: string): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeStorage(key: string, value: string | null) {
+  if (typeof window === "undefined") return;
+  try {
+    if (value) window.localStorage.setItem(key, value);
+    else window.localStorage.removeItem(key);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function FamilyProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const [activeFamily, setActiveFamily] = useState<Family | null>(null);
-  const [activePatient, setActivePatient] = useState<Patient | null>(null);
+  const [activeFamily, setActiveFamilyState] = useState<Family | null>(null);
+  const [activePatient, setActivePatientState] = useState<Patient | null>(null);
+
+  const setActiveFamily = useCallback((f: Family | null) => {
+    setActiveFamilyState(f);
+    writeStorage(FAMILY_KEY, f?.id ?? null);
+  }, []);
+
+  const setActivePatient = useCallback((p: Patient | null) => {
+    setActivePatientState(p);
+    writeStorage(PATIENT_KEY, p?.id ?? null);
+  }, []);
 
   const familiesQ = useQuery({
     queryKey: ["families", user?.id],
@@ -62,21 +94,31 @@ export function FamilyProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  // Hydrate active family from localStorage when families load
   useEffect(() => {
-    if (!activeFamily && familiesQ.data && familiesQ.data.length > 0) {
-      setActiveFamily(familiesQ.data[0]);
-    }
-  }, [familiesQ.data, activeFamily]);
+    if (activeFamily || !familiesQ.data || familiesQ.data.length === 0) return;
+    const savedId = readStorage(FAMILY_KEY);
+    const saved = savedId ? familiesQ.data.find((f) => f.id === savedId) : null;
+    setActiveFamily(saved ?? familiesQ.data[0]);
+  }, [familiesQ.data, activeFamily, setActiveFamily]);
 
+  // Hydrate active patient from localStorage when patients load
   useEffect(() => {
-    if (patientsQ.data && patientsQ.data.length > 0) {
-      if (!activePatient || activePatient.family_id !== activeFamily?.id) {
-        setActivePatient(patientsQ.data[0]);
-      }
-    } else if (patientsQ.data && patientsQ.data.length === 0) {
+    if (!patientsQ.data) return;
+    if (patientsQ.data.length === 0) {
       setActivePatient(null);
+      return;
     }
-  }, [patientsQ.data, activeFamily?.id, activePatient]);
+    const currentValid =
+      activePatient &&
+      activePatient.family_id === activeFamily?.id &&
+      patientsQ.data.some((p) => p.id === activePatient.id);
+    if (currentValid) return;
+
+    const savedId = readStorage(PATIENT_KEY);
+    const saved = savedId ? patientsQ.data.find((p) => p.id === savedId) : null;
+    setActivePatient(saved ?? patientsQ.data[0]);
+  }, [patientsQ.data, activeFamily?.id, activePatient, setActivePatient]);
 
   return (
     <FamilyContext.Provider
