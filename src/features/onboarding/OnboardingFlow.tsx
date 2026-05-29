@@ -8,6 +8,7 @@ import { StepPatient, type StepPatientData } from "./steps/StepPatient";
 import { StepCritical, type StepCriticalData } from "./steps/StepCritical";
 import { StepFirstAction } from "./steps/StepFirstAction";
 import { useAuth } from "@/contexts/AuthContext";
+import { useFamilyContext } from "@/contexts/FamilyContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -15,6 +16,7 @@ const TOTAL_STEPS = 5;
 
 export function OnboardingFlow() {
   const { user } = useAuth();
+  const { setActiveFamily, setActivePatient } = useFamilyContext();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -50,6 +52,7 @@ export function OnboardingFlow() {
 
       setFamilyData(data);
       setFamilyId(fam.id);
+      setActiveFamily({ id: fam.id, name: data.name });
       setStep(3);
     } catch (err: any) {
       toast.error("Não foi possível criar a família", { description: err.message });
@@ -89,6 +92,13 @@ export function OnboardingFlow() {
       if (error) throw error;
 
       setPatientId(pat.id);
+      setActivePatient({
+        id: pat.id,
+        family_id: familyId,
+        name: data.fullName,
+        relation: data.relation || null,
+        avatarUrl: photoUrl,
+      });
       setStep(4);
     } catch (err: any) {
       toast.error("Não foi possível adicionar o familiar", { description: err.message });
@@ -213,6 +223,20 @@ export function OnboardingFlow() {
           )}
           {step === 5 && familyId && (
             <StepFirstAction familyId={familyId} onChoose={finish} />
+          )}
+
+          {(step === 4 || step === 5) && (
+            <div className="mt-6 flex">
+              <Button
+                type="button"
+                variant="link"
+                disabled={loading}
+                onClick={() => (step === 4 ? setStep(5) : finish("/dashboard"))}
+                className="px-0 text-sm text-muted-foreground hover:text-foreground"
+              >
+                Preencher depois
+              </Button>
+            </div>
           )}
         </div>
       </main>
