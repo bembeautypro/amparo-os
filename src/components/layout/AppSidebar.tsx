@@ -12,11 +12,12 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
     cn(
       "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
       active
-        ? "bg-primary-soft text-primary"
-        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+        ? "bg-sidebar-accent text-sidebar-foreground"
+        : "text-sidebar-foreground/60 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
       collapsed && "justify-center px-0",
       disabled && "pointer-events-none opacity-40",
     );
+
 
   return (
     <aside
