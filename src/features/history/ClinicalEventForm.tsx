@@ -344,7 +344,7 @@ export function ClinicalEventForm({ familyId, patientId, initial }: Props) {
             type="button"
             variant="outline"
             className="flex-1"
-            onClick={() => navigate({ to: ".." as never })}
+            onClick={() => navigate({ to: "/familia/$familyId/historico", params: { familyId } })}
           >
             Cancelar
           </Button>
