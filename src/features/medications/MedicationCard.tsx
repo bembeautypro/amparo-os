@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Check, MoreVertical, Pill } from "lucide-react";
+import { Check, MoreVertical } from "lucide-react";
 import { startOfDay, endOfDay, format } from "date-fns";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import {
   markDoseTaken,
 } from "./api";
 import { MedicationActionsSheet } from "./MedicationActionsSheet";
+import { MedicationPhoto } from "./MedicationPhoto";
 import { parseSchedule, scheduledForToday } from "./utils";
 import type { Medication, MedicationStatus } from "./types";
 
@@ -85,9 +86,11 @@ export function MedicationCard({
     <>
       <Card className="relative border-border/70 p-5 shadow-soft">
         <div className="flex items-start gap-4">
-          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary">
-            <Pill className="h-5 w-5" />
-          </span>
+          <MedicationPhoto
+            path={medication.photo_path}
+            className="h-14 w-14 shrink-0"
+            rounded="xl"
+          />
           <div className="min-w-0 flex-1 pr-8">
             <p className="truncate font-semibold leading-tight">
               {medication.name}

@@ -1,34 +1,42 @@
-## Veredito sobre o esquema proposto (uploads `20260526000001/02`)
+## Tornar a foto do medicamento visível em toda a jornada
 
-**Não vale a pena migrar.** O banco atual já é equivalente em performance e segurança ao proposto:
+### Diagnóstico
+- **Upload:** ✅ funciona. `PhotoUploader` envia para o bucket privado `medication-photos` no path `{patientId}/{uuid}.{ext}` e grava o caminho em `medications.photo_url`.
+- **Exibição:** ❌ ausente. A foto só aparece como preview dentro do próprio formulário. Nem o card da lista (`MedicationCard`), nem a tela de detalhe, nem o histórico mostram a imagem. Resultado: o usuário tira a foto, salva, e nunca mais vê.
+- **Sem OCR.** O usuário esclareceu que não precisa de OCR — só quer ver a foto que tirou.
 
-- **RLS sem recursão:** ambos usam funções `SECURITY DEFINER` (`app_private.is_family_admin`, `is_family_member`, `patient_family`) para evitar recursão de policy. Idêntico em comportamento.
-- **Índices e FKs:** o esquema atual cobre `patient_id`, `family_id`, `medication_id`, `appointment_id`, `clinical_event_id` — mesmas joins críticas. Sem regressão.
-- **Diferenças são só de nomenclatura:** enums em inglês no proposto vs. mistos português/inglês no atual (`appointment_type` = `consulta/exame/retorno` etc.); `family_member_role` vs. `family_role`; bucket `documents` vs. `patient-documents`; `severity_level` vs. `allergy_severity`.
-- **Custo de migrar:** recasting de **todos** os enums + reescrita de todo o código TS/SQL que os referencia + regeneração de `src/integrations/supabase/types.ts` + migração física de arquivos do storage. Risco de quebrar 100% das telas, **zero ganho de performance**.
-
-**Decisão:** manter o esquema atual. Padronizar apenas a convenção de **path do storage** (item 7 do plano), que dá benefício real (segurança via RLS por `family_id` na primeira pasta) sem renomear buckets.
-
----
-
-## Plano de execução (aprovado)
+### O que vou fazer
 
 ```text
-1. Remover src/routes/emergencia.tsx (rota órfã fora da spec)
-2. AlertsCard → corrigir os 5 destinos para rotas do paciente / edição
-3. Edge function log-emergency-access:
-     - adicionar preferred_hospital ao SELECT do paciente
-     - gerar signed URL (3600s) para photo_url e incluir no payload
-4. Página pública /emergencia/:token:
-     - renderizar foto real quando a URL chegar
-     - adicionar SEÇÃO 7 "Hospital de preferência"
-5. ClinicalEventDetail: canEdit = role === 'admin' || role === 'editor'
-6. MedicationForm/PhotoUploader: dois botões no mobile (Câmera + Galeria)
-7. AppointmentForm e ClinicalEventForm: trocar upload manual pelo helper
-   uploadDocumentFile() para padronizar path {familyId}/{patientId}/{uuid}.{ext}
-8. Smoke test final
+1. Criar componente reutilizável <MedicationPhoto path size />
+   - Gera signed URL (1h) com cache via TanStack Query
+     (queryKey: ["med-photo", path], staleTime: 55min)
+   - Renderiza <img> redondo/quadrado com fallback de ícone
+     (Pill) quando path é null
+   - Skeleton enquanto carrega a signed URL
+
+2. MedicationCard (lista /medicamentos):
+   - Adicionar thumbnail 56x56 à esquerda do nome
+   - Mantém o nome, dosagem e horários ao lado
+
+3. Tela de detalhe do medicamento:
+   - Banner com a foto em tamanho maior (h-40, object-cover)
+   - Clique abre lightbox simples (Dialog do shadcn) em tamanho cheio
+
+4. Refatorar PhotoUploader para também usar o novo
+   componente no preview (evita duplicação da lógica de
+   signed URL e bate o mesmo cache)
 ```
 
-Nenhuma migration de banco. Nenhum token de design alterado.
+### Detalhes técnicos
+- Bucket `medication-photos` já é privado com RLS por `family_id` (membros ativos podem ler) — apenas o caminho de signed URL muda na UI, **sem mexer em RLS nem migração**.
+- Cache compartilhado por `path` evita gerar signed URL N vezes na lista.
+- Sem mudança de design system, paleta, ou tokens.
+- Sem mudança de schema.
 
-**Aprove para eu entrar em build mode e executar.**
+### Fora de escopo (não vou fazer)
+- OCR / extração de texto da caixa.
+- Upload múltiplo de fotos por medicamento.
+- Crop/edição da imagem.
+
+Aprove para eu entrar em build mode e implementar.
