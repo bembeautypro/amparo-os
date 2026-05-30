@@ -248,7 +248,7 @@ export function OnboardingFlow() {
                 type="button"
                 variant="link"
                 disabled={loading}
-                onClick={() => (step === 4 ? setStep(5) : finish("/dashboard"))}
+                onClick={() => (step === 4 ? setStep(5) : finish("dashboard"))}
                 className="px-0 text-sm text-muted-foreground hover:text-foreground"
               >
                 Preencher depois
