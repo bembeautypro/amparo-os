@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Check, MoreVertical, Pill } from "lucide-react";
+import { Check, MoreVertical } from "lucide-react";
 import { startOfDay, endOfDay, format } from "date-fns";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import {
   markDoseTaken,
 } from "./api";
 import { MedicationActionsSheet } from "./MedicationActionsSheet";
+import { MedicationPhoto } from "./MedicationPhoto";
 import { parseSchedule, scheduledForToday } from "./utils";
 import type { Medication, MedicationStatus } from "./types";
 
