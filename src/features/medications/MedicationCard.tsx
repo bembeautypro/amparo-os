@@ -87,7 +87,7 @@ export function MedicationCard({
       <Card className="relative border-border/70 p-5 shadow-soft">
         <div className="flex items-start gap-4">
           <MedicationPhoto
-            path={medication.photo_url}
+            path={medication.photo_path}
             className="h-14 w-14 shrink-0"
             rounded="xl"
           />
