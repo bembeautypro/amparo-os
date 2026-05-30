@@ -18,7 +18,7 @@ export const Route = createFileRoute("/familia/$familyId/historico/novo")({
 
 function Page() {
   const { familyId } = useParams({ from: "/familia/$familyId/historico/novo" });
-  const { activePatient } = useFamilyContext();
+  const { activePatient, loading } = useFamilyContext();
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       <Button asChild variant="ghost" size="sm" className="-ml-2 gap-1.5">
@@ -27,7 +27,9 @@ function Page() {
         </Link>
       </Button>
       <h1 className="text-2xl font-semibold tracking-tight">Novo evento</h1>
-      {activePatient ? (
+      {loading ? (
+        <p className="text-sm text-muted-foreground">Carregando…</p>
+      ) : activePatient ? (
         <ClinicalEventForm familyId={familyId} patientId={activePatient.id} />
       ) : (
         <p className="text-sm text-muted-foreground">Selecione um familiar.</p>

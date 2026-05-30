@@ -16,7 +16,10 @@ export const Route = createFileRoute("/familia/$familyId/documentos/novo")({
 
 function Page() {
   const { familyId } = useParams({ from: "/familia/$familyId/documentos/novo" });
-  const { activePatient } = useFamilyContext();
+  const { activePatient, loading } = useFamilyContext();
+  if (loading) {
+    return <p className="text-sm text-muted-foreground">Carregando…</p>;
+  }
   if (!activePatient) {
     return <p className="text-sm text-muted-foreground">Selecione um familiar.</p>;
   }

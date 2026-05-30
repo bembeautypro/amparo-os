@@ -55,7 +55,7 @@ function ActivityPage() {
     queryFn: () => listMembers(familyId),
   });
   const myMember = (membersQ.data ?? []).find((m) => m.user_id === user?.id);
-  const isAdmin = myMember?.role === "admin";
+  const isMember = !!myMember;
 
   const logsQ = useInfiniteQuery({
     queryKey: ["activity", familyId, actorFilter, action],
@@ -69,19 +69,19 @@ function ActivityPage() {
         action: action !== "all" ? action : undefined,
       }),
     getNextPageParam: (last, all) => (last.hasMore ? all.length : undefined),
-    enabled: isAdmin,
+    enabled: isMember,
   });
 
   if (membersQ.isLoading) {
     return <Card className="p-6 text-sm text-muted-foreground">Carregando…</Card>;
   }
 
-  if (!isAdmin) {
+  if (!isMember) {
     return (
       <EmptyState
         icon={ShieldAlert}
         title="Acesso restrito"
-        description="Apenas administradores da família podem ver o log de atividade."
+        description="Você não é membro desta família."
       />
     );
   }

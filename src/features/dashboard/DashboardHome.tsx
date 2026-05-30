@@ -38,10 +38,15 @@ export function DashboardHome() {
         <Users className="mx-auto h-10 w-10 text-primary" />
         <h2 className="mt-4 text-xl font-semibold">Adicione um familiar</h2>
         <p className="mx-auto mt-1.5 max-w-md text-sm text-muted-foreground">
-          Complete o cadastro para começar a registrar medicamentos e consultas.
+          Cadastre um familiar para começar a registrar medicamentos e consultas.
         </p>
         <Button asChild className="mt-6 h-11">
-          <Link to="/onboarding">Continuar onboarding</Link>
+          <Link
+            to="/familia/$familyId/pacientes/novo"
+            params={{ familyId: activeFamily.id }}
+          >
+            Adicionar familiar
+          </Link>
         </Button>
       </Card>
     );
