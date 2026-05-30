@@ -75,7 +75,8 @@ function MembersPage() {
   });
 
   const myMember = (membersQ.data ?? []).find((m) => m.user_id === user?.id);
-  const isAdmin = myMember?.role === "admin";
+  const isMember = !!myMember;
+  const isAdmin = isMember; // qualquer membro ativo tem permissão total
 
   const resendMut = useMutation({
     mutationFn: (inv: Invitation) => resendInvitation(inv),
