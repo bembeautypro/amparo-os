@@ -34,6 +34,7 @@ import { fetchMedicationById, updateMedicationStatus } from "@/features/medicati
 import { AdherenceCalendar } from "@/features/medications/AdherenceCalendar";
 import { LogsList } from "@/features/medications/LogsList";
 import { ChangeHistoryTimeline } from "@/features/medications/ChangeHistoryTimeline";
+import { MedicationPhoto } from "@/features/medications/MedicationPhoto";
 import { parseSchedule } from "@/features/medications/utils";
 import {
   FORM_OPTIONS,
