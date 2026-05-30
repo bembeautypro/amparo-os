@@ -12,7 +12,7 @@ type Alert = {
   id: string;
   label: string;
   to: string;
-  params?: Record<string, string>;
+  params: Record<string, string>;
 };
 
 export function AlertsCard({
@@ -30,13 +30,16 @@ export function AlertsCard({
 
   const alerts: Alert[] = [];
 
+  const profilePath = "/familia/$familyId/pacientes/$patientId";
+  const profileParams = { familyId, patientId };
+
   medsQ.data?.forEach((m) => {
     if (!m.schedule || m.schedule.length === 0) {
       alerts.push({
         id: `med-${m.id}`,
         label: `Medicamento "${m.name}" sem horário definido`,
-        to: "/familia/$familyId/medicamentos",
-        params: { familyId },
+        to: "/familia/$familyId/medicamentos/$medId/editar",
+        params: { familyId, medId: m.id },
       });
     }
   });
@@ -45,7 +48,8 @@ export function AlertsCard({
     alerts.push({
       id: "no-contact",
       label: "Adicione um contato de emergência",
-      to: "/emergencia",
+      to: profilePath,
+      params: profileParams,
     });
   }
 
@@ -54,7 +58,8 @@ export function AlertsCard({
       alerts.push({
         id: `appt-${a.id}`,
         label: `Consulta "${a.title}" sem responsável definido`,
-        to: "/agenda",
+        to: "/familia/$familyId/agenda/$id/editar",
+        params: { familyId, id: a.id },
       });
     }
   });
@@ -63,7 +68,8 @@ export function AlertsCard({
     alerts.push({
       id: "no-blood",
       label: "Cadastre o tipo sanguíneo",
-      to: "/perfil",
+      to: profilePath,
+      params: profileParams,
     });
   }
 
@@ -71,7 +77,8 @@ export function AlertsCard({
     alerts.push({
       id: "no-allergies",
       label: "Registre alergias conhecidas (ou confirme que não há)",
-      to: "/perfil",
+      to: profilePath,
+      params: profileParams,
     });
   }
 

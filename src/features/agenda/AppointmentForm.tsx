@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadDocumentFile } from "@/features/documents/api";
 import { fetchDoneAppointments } from "./api";
 import { TYPE_OPTIONS, type Appointment, type AppointmentType } from "./types";
 
@@ -125,23 +126,19 @@ export function AppointmentForm({
         apptId = data.id;
       }
 
-      // Upload attachments
+      // Upload attachments using the standardized helper
+      // (path convention: {familyId}/{patientId}/{uuid}.{ext})
       for (const file of files) {
         if (file.size > 15 * 1024 * 1024) continue;
-        const safeName = file.name.replace(/[^\w.\-]+/g, "_");
-        const path = `${patientId}/${Date.now()}_${safeName}`;
-        const up = await supabase.storage
-          .from("patient-documents")
-          .upload(path, file, { contentType: file.type, upsert: false });
-        if (up.error) throw up.error;
+        const uploaded = await uploadDocumentFile({ familyId, patientId, file });
         const { error: docErr } = await supabase.from("documents").insert({
           patient_id: patientId,
           appointment_id: apptId,
           title: file.name,
           doc_type: "other",
-          file_path: path,
-          mime_type: file.type,
-          file_size: file.size,
+          file_path: uploaded.path,
+          mime_type: uploaded.mime_type,
+          file_size: uploaded.file_size,
         });
         if (docErr) throw docErr;
       }

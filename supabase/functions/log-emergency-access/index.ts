@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
       supabase
         .from("patients")
         .select(
-          "id, full_name, birth_date, blood_type, photo_url, insurance_name, insurance_number",
+          "id, full_name, birth_date, blood_type, photo_url, insurance_name, insurance_number, preferred_hospital",
         )
         .eq("id", patientId)
         .maybeSingle(),
@@ -74,6 +74,16 @@ Deno.serve(async (req) => {
         .eq("patient_id", patientId)
         .eq("status", "active"),
     ]);
+
+    // Generate a short-lived signed URL for the patient's photo so the
+    // public emergency page can render the real picture (bucket is private).
+    let photo_signed_url: string | null = null;
+    if (patient.data?.photo_url) {
+      const { data: signed } = await supabase.storage
+        .from("patient-photos")
+        .createSignedUrl(patient.data.photo_url, 3600);
+      photo_signed_url = signed?.signedUrl ?? null;
+    }
 
     // Log access + bump counters (best-effort)
     const ip =
@@ -104,7 +114,9 @@ Deno.serve(async (req) => {
         created_at: link.created_at,
         expires_at: link.expires_at,
       },
-      patient: patient.data,
+      patient: patient.data
+        ? { ...patient.data, photo_signed_url }
+        : null,
       allergies: allergies.data ?? [],
       conditions: conditions.data ?? [],
       contacts: contacts.data ?? [],

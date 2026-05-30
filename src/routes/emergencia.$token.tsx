@@ -12,8 +12,10 @@ type EmergencyData = {
     birth_date: string | null;
     blood_type: string | null;
     photo_url: string | null;
+    photo_signed_url: string | null;
     insurance_name: string | null;
     insurance_number: string | null;
+    preferred_hospital: string | null;
   } | null;
   allergies: { id: string; name: string; severity: string }[];
   conditions: { id: string; name: string; status: string }[];
@@ -93,11 +95,15 @@ function PublicEmergencyPage() {
         {/* Identification */}
         <section className="rounded-2xl border border-border bg-card p-4">
           <div className="flex items-center gap-4">
-            {p?.photo_url ? (
-              <PhotoCircle path={p.photo_url} alt={p.full_name} />
+            {p?.photo_signed_url ? (
+              <img
+                src={p.photo_signed_url}
+                alt={p.full_name}
+                className="h-16 w-16 rounded-full border border-border object-cover"
+              />
             ) : (
               <div className="grid h-16 w-16 place-items-center rounded-full bg-primary-soft text-xl font-bold text-primary">
-                {(p?.full_name ?? "?").slice(0, 1)}
+                {(p?.full_name ?? "?").slice(0, 1).toUpperCase()}
               </div>
             )}
             <div className="min-w-0 flex-1">
@@ -177,6 +183,13 @@ function PublicEmergencyPage() {
           </Section>
         )}
 
+        {/* Preferred hospital */}
+        {p?.preferred_hospital && (
+          <Section title="Hospital de preferência" icon={<Hospital className="h-5 w-5" />}>
+            <p className="text-lg font-semibold">{p.preferred_hospital}</p>
+          </Section>
+        )}
+
         {/* Contacts */}
         {d.contacts.length > 0 && (
           <Section
@@ -246,13 +259,3 @@ function Section({
   );
 }
 
-function PhotoCircle({ path, alt }: { path: string; alt: string }) {
-  // Public page can't get signed URL for private bucket; show fallback initials.
-  // (Patient photos live in a private bucket; rendering them publicly would
-  // require a separate signed-URL flow via the edge function.)
-  return (
-    <div className="grid h-16 w-16 place-items-center rounded-full bg-primary-soft text-xl font-bold text-primary">
-      {alt.slice(0, 1).toUpperCase()}
-    </div>
-  );
-}
