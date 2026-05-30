@@ -50,7 +50,16 @@ function FamilyPage() {
     },
   });
 
-  const OnboardingBtn = (
+  const AddPatientBtn = activeFamily ? (
+    <Button asChild className="h-11">
+      <Link
+        to="/familia/$familyId/pacientes/novo"
+        params={{ familyId: activeFamily.id }}
+      >
+        Adicionar familiar
+      </Link>
+    </Button>
+  ) : (
     <Button asChild className="h-11">
       <Link to="/onboarding">Iniciar onboarding</Link>
     </Button>
