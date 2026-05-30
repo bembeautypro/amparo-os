@@ -105,9 +105,19 @@ export function AppHeader({ onToggleSidebar }: { onToggleSidebar: () => void }) 
             )}
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link to="/onboarding" className="gap-2">
-                <Plus className="h-4 w-4" /> Adicionar familiar
-              </Link>
+              {activeFamily ? (
+                <Link
+                  to="/familia/$familyId/pacientes/novo"
+                  params={{ familyId: activeFamily.id }}
+                  className="gap-2"
+                >
+                  <Plus className="h-4 w-4" /> Adicionar familiar
+                </Link>
+              ) : (
+                <Link to="/onboarding" className="gap-2">
+                  <Plus className="h-4 w-4" /> Adicionar familiar
+                </Link>
+              )}
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/familia">Ver todos</Link>
