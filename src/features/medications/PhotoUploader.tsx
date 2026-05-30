@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Camera, ImagePlus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { MedicationPhoto } from "./MedicationPhoto";
 
 type Props = {
   patientId: string;
@@ -14,28 +16,7 @@ export function PhotoUploader({ patientId, value, onChange }: Props) {
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    if (!value) {
-      setPreviewUrl(null);
-      return;
-    }
-    if (/^https?:\/\//i.test(value)) {
-      setPreviewUrl(value);
-      return;
-    }
-    (async () => {
-      const { data } = await supabase.storage
-        .from("medication-photos")
-        .createSignedUrl(value, 60 * 60);
-      if (active) setPreviewUrl(data?.signedUrl ?? null);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [value]);
+  const qc = useQueryClient();
 
   const handleFile = async (file: File) => {
     if (!file) return;
@@ -48,6 +29,7 @@ export function PhotoUploader({ patientId, value, onChange }: Props) {
         .upload(path, file, { upsert: false, contentType: file.type });
       if (error) throw error;
       onChange(path);
+      qc.invalidateQueries({ queryKey: ["med-photo", path] });
       toast.success("Foto enviada");
     } catch (e) {
       toast.error((e as Error).message);
@@ -58,13 +40,9 @@ export function PhotoUploader({ patientId, value, onChange }: Props) {
 
   return (
     <div className="space-y-3">
-      {previewUrl && (
+      {value && (
         <div className="relative inline-block">
-          <img
-            src={previewUrl}
-            alt="Foto"
-            className="h-32 w-32 rounded-xl border border-border object-cover"
-          />
+          <MedicationPhoto path={value} className="h-32 w-32" rounded="xl" />
           <button
             type="button"
             onClick={() => onChange(null)}
@@ -84,7 +62,7 @@ export function PhotoUploader({ patientId, value, onChange }: Props) {
           onClick={() => cameraRef.current?.click()}
         >
           <Camera className="h-4 w-4" />
-          📷 Câmera
+          Câmera
         </Button>
         <Button
           type="button"
@@ -94,7 +72,7 @@ export function PhotoUploader({ patientId, value, onChange }: Props) {
           onClick={() => galleryRef.current?.click()}
         >
           <ImagePlus className="h-4 w-4" />
-          🖼 Galeria
+          Galeria
         </Button>
         <input
           ref={cameraRef}
