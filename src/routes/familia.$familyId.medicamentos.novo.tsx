@@ -18,7 +18,7 @@ export const Route = createFileRoute("/familia/$familyId/medicamentos/novo")({
 
 function NewMedicationPage() {
   const { familyId } = useParams({ from: "/familia/$familyId/medicamentos/novo" });
-  const { activePatient } = useFamilyContext();
+  const { activePatient, loading } = useFamilyContext();
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -37,7 +37,9 @@ function NewMedicationPage() {
         </p>
       </div>
 
-      {activePatient ? (
+      {loading ? (
+        <p className="text-sm text-muted-foreground">Carregando…</p>
+      ) : activePatient ? (
         <MedicationForm
           mode="create"
           familyId={familyId}
