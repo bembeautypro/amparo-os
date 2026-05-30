@@ -1,6 +1,17 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { Users, Plus, Pill, CalendarDays, FileText, AlertTriangle } from "lucide-react";
+import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Users,
+  Plus,
+  Pill,
+  CalendarDays,
+  FileText,
+  AlertTriangle,
+  Trash2,
+  Loader2,
+} from "lucide-react";
+import { toast } from "sonner";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/card";
@@ -8,8 +19,18 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { PatientAvatarImage } from "@/components/PatientAvatarImage";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { EmptyState, PageHeader } from "@/components/ui-extras";
-import { useFamilyContext } from "@/contexts/FamilyContext";
+import { useFamilyContext, type Patient } from "@/contexts/FamilyContext";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/familia")({
@@ -23,7 +44,11 @@ export const Route = createFileRoute("/familia")({
 });
 
 function FamilyPage() {
-  const { activeFamily, patients, setActivePatient, activePatient } = useFamilyContext();
+  const { activeFamily, patients, setActivePatient, activePatient } =
+    useFamilyContext();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const [confirmDelete, setConfirmDelete] = useState<Patient | null>(null);
 
   const { data: counts } = useQuery({
     queryKey: ["patient-counts", activeFamily?.id, patients.map((p) => p.id).join(",")],
@@ -48,6 +73,22 @@ function FamilyPage() {
         allergies: tally(allergies.data),
       };
     },
+  });
+
+  const deleteMut = useMutation({
+    mutationFn: async (p: Patient) => {
+      const { error } = await supabase.from("patients").delete().eq("id", p.id);
+      if (error) throw error;
+    },
+    onSuccess: (_, p) => {
+      toast.success("Familiar removido");
+      if (activePatient?.id === p.id) setActivePatient(null);
+      qc.invalidateQueries({ queryKey: ["patients"] });
+      qc.invalidateQueries({ queryKey: ["patient-counts"] });
+      setConfirmDelete(null);
+    },
+    onError: (e: Error) =>
+      toast.error("Não foi possível remover", { description: e.message }),
   });
 
   const AddPatientBtn = activeFamily ? (
@@ -76,11 +117,18 @@ function FamilyPage() {
     );
   }
 
+  function go(p: Patient, to: "/familia/$familyId/medicamentos" | "/familia/$familyId/agenda/novo" | "/familia/$familyId/documentos/novo") {
+    setActivePatient(p);
+    if (!activeFamily) return;
+    navigate({ to, params: { familyId: activeFamily.id } });
+  }
+
   return (
     <div className="space-y-8">
       <PageHeader
         title={activeFamily.name}
         description="Familiares sob seu cuidado e atalhos rápidos."
+        action={AddPatientBtn}
       />
 
       {patients.length === 0 ? (
@@ -145,30 +193,39 @@ function FamilyPage() {
                   />
                 </div>
 
-                <div className="mt-5 flex flex-wrap gap-2">
-                  <Button asChild size="sm" variant="secondary" className="gap-1.5">
-                    <Link
-                      to="/familia/$familyId/medicamentos"
-                      params={{ familyId: activeFamily.id }}
-                    >
-                      <Pill className="h-3.5 w-3.5" /> Medicamentos
-                    </Link>
+                <div className="mt-5 flex flex-wrap items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="gap-1.5"
+                    onClick={() => go(p, "/familia/$familyId/medicamentos")}
+                  >
+                    <Pill className="h-3.5 w-3.5" /> Medicamentos
                   </Button>
-                  <Button asChild size="sm" variant="secondary" className="gap-1.5">
-                    <Link
-                      to="/familia/$familyId/agenda/novo"
-                      params={{ familyId: activeFamily.id }}
-                    >
-                      <Plus className="h-3.5 w-3.5" /> Consulta
-                    </Link>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="gap-1.5"
+                    onClick={() => go(p, "/familia/$familyId/agenda/novo")}
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Consulta
                   </Button>
-                  <Button asChild size="sm" variant="secondary" className="gap-1.5">
-                    <Link
-                      to="/familia/$familyId/documentos/novo"
-                      params={{ familyId: activeFamily.id }}
-                    >
-                      <Plus className="h-3.5 w-3.5" /> Documento
-                    </Link>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="gap-1.5"
+                    onClick={() => go(p, "/familia/$familyId/documentos/novo")}
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Documento
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="ml-auto gap-1.5 text-destructive hover:text-destructive"
+                    onClick={() => setConfirmDelete(p)}
+                    aria-label={`Remover ${p.name}`}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Remover
                   </Button>
                 </div>
               </Card>
@@ -176,6 +233,39 @@ function FamilyPage() {
           })}
         </div>
       )}
+
+      <AlertDialog
+        open={!!confirmDelete}
+        onOpenChange={(o) => !o && setConfirmDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Remover {confirmDelete?.name}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Todos os dados clínicos vinculados (medicamentos, consultas,
+              documentos, eventos) também serão removidos. Esta ação não pode
+              ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={(e) => {
+                e.preventDefault();
+                if (confirmDelete) deleteMut.mutate(confirmDelete);
+              }}
+            >
+              {deleteMut.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Remover
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
