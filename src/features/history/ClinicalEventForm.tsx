@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadDocumentFile } from "@/features/documents/api";
 import { fetchAppointmentsForPatient } from "./api";
 import {
   SEVERITY_META,
