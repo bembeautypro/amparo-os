@@ -37,7 +37,7 @@ export const Route = createFileRoute("/familia/$familyId/agenda/novo")({
 function NewAppointmentPage() {
   const { familyId } = useParams({ from: "/familia/$familyId/agenda/novo" });
   const search = useSearch({ from: "/familia/$familyId/agenda/novo" });
-  const { activePatient } = useFamilyContext();
+  const { activePatient, loading } = useFamilyContext();
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
@@ -47,7 +47,9 @@ function NewAppointmentPage() {
         </Link>
       </Button>
       <h1 className="text-2xl font-semibold tracking-tight">Novo compromisso</h1>
-      {activePatient ? (
+      {loading ? (
+        <p className="text-sm text-muted-foreground">Carregando…</p>
+      ) : activePatient ? (
         <AppointmentForm
           familyId={familyId}
           patientId={activePatient.id}
