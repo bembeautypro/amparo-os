@@ -164,6 +164,15 @@ function MedicationDetailPage() {
         </Button>
       </header>
 
+      {m.photo_path && (
+        <MedicationPhoto
+          path={m.photo_path}
+          className="h-48 w-full"
+          rounded="xl"
+          zoomable
+        />
+      )}
+
       <Card className="border-border/70 p-5 shadow-soft">
         <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
           <Info label="Nome genérico" value={m.generic_name} />
