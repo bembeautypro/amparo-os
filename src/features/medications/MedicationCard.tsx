@@ -86,9 +86,11 @@ export function MedicationCard({
     <>
       <Card className="relative border-border/70 p-5 shadow-soft">
         <div className="flex items-start gap-4">
-          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary">
-            <Pill className="h-5 w-5" />
-          </span>
+          <MedicationPhoto
+            path={medication.photo_url}
+            className="h-14 w-14 shrink-0"
+            rounded="xl"
+          />
           <div className="min-w-0 flex-1 pr-8">
             <p className="truncate font-semibold leading-tight">
               {medication.name}
