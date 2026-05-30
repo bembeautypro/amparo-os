@@ -165,9 +165,19 @@ export function OnboardingFlow() {
     }
   }
 
-  function finish(target: string) {
+  function finish(target: import("./steps/StepFirstAction").FirstActionTarget) {
     toast.success("Tudo pronto!", { description: "Bem-vindo ao Amparo." });
-    navigate({ to: target });
+    if (!familyId || target === "dashboard") {
+      navigate({ to: "/dashboard" });
+      return;
+    }
+    if (target === "medication") {
+      navigate({ to: "/familia/$familyId/medicamentos/novo", params: { familyId } });
+    } else if (target === "document") {
+      navigate({ to: "/familia/$familyId/documentos/novo", params: { familyId } });
+    } else if (target === "appointment") {
+      navigate({ to: "/familia/$familyId/agenda/novo", params: { familyId } });
+    }
   }
 
   return (
@@ -238,7 +248,7 @@ export function OnboardingFlow() {
                 type="button"
                 variant="link"
                 disabled={loading}
-                onClick={() => (step === 4 ? setStep(5) : finish("/dashboard"))}
+                onClick={() => (step === 4 ? setStep(5) : finish("dashboard"))}
                 className="px-0 text-sm text-muted-foreground hover:text-foreground"
               >
                 Preencher depois

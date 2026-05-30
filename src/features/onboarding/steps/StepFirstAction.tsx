@@ -1,37 +1,48 @@
 import { Pill, FileUp, CalendarPlus, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+export type FirstActionTarget =
+  | "medication"
+  | "document"
+  | "appointment"
+  | "dashboard";
+
 export function StepFirstAction({
-  familyId,
   onChoose,
 }: {
   familyId: string;
-  onChoose: (target: string) => void;
+  onChoose: (target: FirstActionTarget) => void;
 }) {
-  const actions = [
+  const actions: {
+    icon: typeof Pill;
+    title: string;
+    desc: string;
+    target: FirstActionTarget;
+    primary?: boolean;
+  }[] = [
     {
       icon: Pill,
       title: "Adicionar medicamento",
       desc: "Cadastre doses e horários",
-      target: `/familia/${familyId}/medicamentos/novo`,
+      target: "medication",
     },
     {
       icon: FileUp,
       title: "Subir receita ou exame",
       desc: "Mantenha tudo digitalizado",
-      target: `/familia/${familyId}/documentos/novo`,
+      target: "document",
     },
     {
       icon: CalendarPlus,
       title: "Criar consulta",
       desc: "Agende e receba lembretes",
-      target: `/familia/${familyId}/agenda/novo`,
+      target: "appointment",
     },
     {
       icon: LayoutDashboard,
       title: "Ver meu painel",
       desc: "Comece pelo resumo geral",
-      target: "/dashboard",
+      target: "dashboard",
       primary: true,
     },
   ];
