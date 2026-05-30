@@ -71,7 +71,7 @@ function FamilyPage() {
         icon={Users}
         title="Crie sua família"
         description="Comece adicionando familiares para organizar a saúde de todos juntos."
-        action={OnboardingBtn}
+        action={AddPatientBtn}
       />
     );
   }
@@ -88,7 +88,7 @@ function FamilyPage() {
           icon={Users}
           title="Nenhum familiar cadastrado"
           description="Adicione um familiar para começar a registrar medicamentos, consultas e documentos."
-          action={OnboardingBtn}
+          action={AddPatientBtn}
         />
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
