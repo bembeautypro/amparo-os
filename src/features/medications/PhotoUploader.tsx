@@ -11,7 +11,8 @@ type Props = {
 };
 
 export function PhotoUploader({ patientId, value, onChange }: Props) {
-  const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -80,13 +81,23 @@ export function PhotoUploader({ patientId, value, onChange }: Props) {
           variant="outline"
           className="h-11 gap-2"
           disabled={uploading}
-          onClick={() => fileRef.current?.click()}
+          onClick={() => cameraRef.current?.click()}
+        >
+          <Camera className="h-4 w-4" />
+          📷 Câmera
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          className="h-11 gap-2"
+          disabled={uploading}
+          onClick={() => galleryRef.current?.click()}
         >
           <ImagePlus className="h-4 w-4" />
-          {previewUrl ? "Trocar foto" : "Adicionar foto"}
+          🖼 Galeria
         </Button>
         <input
-          ref={fileRef}
+          ref={cameraRef}
           type="file"
           accept="image/*"
           capture="environment"
@@ -97,9 +108,19 @@ export function PhotoUploader({ patientId, value, onChange }: Props) {
             e.target.value = "";
           }}
         />
+        <input
+          ref={galleryRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) void handleFile(f);
+            e.target.value = "";
+          }}
+        />
       </div>
       <p className="text-xs text-muted-foreground">
-        <Camera className="mr-1 inline h-3 w-3" />
         Tire foto da caixa ou da receita para consulta rápida.
       </p>
     </div>

@@ -64,7 +64,7 @@ export function ClinicalEventDetail({ familyId, eventId }: Props) {
   const e = eventQ.data;
   const t = typeMeta(e.type);
   const s = severityMeta(e.severity);
-  const canEdit = roleQ.data === "admin" || roleQ.data === "caregiver";
+  const canEdit = roleQ.data === "admin" || roleQ.data === "editor";
 
   return (
     <div className="space-y-4">
