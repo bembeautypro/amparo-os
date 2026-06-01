@@ -472,12 +472,17 @@ function ShareTab({
     if (!w) return;
     const canvas = canvasRef.current?.querySelector("canvas") as HTMLCanvasElement | null;
     const dataUrl = canvas?.toDataURL("image/png") ?? "";
-    w.document.write(`<!doctype html><html><head><title>QR Emergência ${patientName}</title>
+    const esc = (s: string) =>
+      s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    const safeName = esc(patientName);
+    const safeUrl = esc(url);
+    const safeDataUrl = esc(dataUrl);
+    w.document.write(`<!doctype html><html><head><title>QR Emergência ${safeName}</title>
       <style>body{font-family:system-ui;text-align:center;padding:24px}
       img{width:300px;height:300px}</style></head>
-      <body><h2>Emergência · ${patientName}</h2>
-      <img src="${dataUrl}" alt="QR" />
-      <p style="word-break:break-all;font-size:12px">${url}</p>
+      <body><h2>Emergência · ${safeName}</h2>
+      <img src="${safeDataUrl}" alt="QR" />
+      <p style="word-break:break-all;font-size:12px">${safeUrl}</p>
       <script>window.onload=()=>{window.print();}</script></body></html>`);
     w.document.close();
   }
