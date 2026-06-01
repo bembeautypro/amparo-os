@@ -1,103 +1,110 @@
-## Diagnóstico inicial
+## Alinhamento Banco × Spec — Plano de migração
 
-A auditoria encontrou que o backend está ativo, o linter não apontou problemas, as tabelas principais estão com RLS ligado, os buckets existem e as permissões gerais de Data API estão disponíveis para usuários autenticados. O problema mais provável agora está na combinação de estado de família/familiar ativo, navegação e alguns fluxos de UI que usam o familiar errado ou navegam de forma inválida.
+**Decisões confirmadas:**
+- RLS permanece **aberta para todo membro ativo da família** (CRUD). Não aplicar restrição admin/editor do spec.
+- **Nomes de colunas atuais são mantidos.** Só adicionamos o que falta (sem renomear). Código TS continua funcionando.
+- **4 buckets mantidos** (patient-documents, patient-photos, medication-photos, profile-photos). Sem consolidação.
 
-Principais causas identificadas:
+---
 
-1. **Onboarding navega para rotas parametrizadas usando URL interpolada**
-   - O botão “Adicionar medicamento / documento / consulta” no final do onboarding monta strings como `/familia/<id>/medicamentos/novo` e chama `navigate({ to: target })`.
-   - Em TanStack Router, isso pode cair em rota inválida e mandar o usuário para `/dashboard`, que explica o comportamento de “saiu da tela e foi pra início”.
+### 1. Migration única — colunas, índices e funções faltantes
 
-2. **Ações em cards de familiares não selecionam o familiar antes de abrir cadastro**
-   - Na página Família, os botões “Consulta” e “Documento” dentro do card de cada familiar navegam para a rota, mas não chamam `setActivePatient(p)`.
-   - Resultado: o cadastro abre para o familiar anteriormente ativo, ou parece que “não dá para escolher entre um e outro”.
+**profiles**
+- adicionar `onboarding_step int default 0`
 
-3. **Rotas de documentos/agenda/medicamentos/histórico dependem só de `activePatient` global**
-   - Se o contexto ainda está carregando, ou se o familiar ativo não pertence à família da URL, a página mostra “Selecione um familiar” ou lista dados errados/vazios.
-   - Isso afeta documentos e outras páginas que parecem “não funcionais”.
+**patients** (soft delete + auditoria)
+- adicionar `deleted_at timestamptz`, `deleted_by uuid`, `created_by uuid`, `notes text`
+- índice `idx_patients_deleted_at`
 
-4. **Algumas rotas/listas ainda não tratam `FamilyContext.loading`**
-   - As rotas novas já melhoraram parcialmente, mas páginas de listagem como documentos, agenda, medicamentos e histórico ainda podem renderizar fallback cedo demais.
+**medications**
+- adicionar `deleted_at`, `deleted_by`
+- índice `idx_medications_deleted_at`, `idx_medications_status`
+- check constraint validando `schedule` no formato `{"times":[...]}` quando não nulo
 
-5. **Documento: fluxo depende de upload antes do registro**
-   - O upload usa o caminho correto `{familyId}/{patientId}/{arquivo}` para o bucket `patient-documents`.
-   - Vou manter esse padrão e reforçar mensagens de erro e invalidação de cache para deixar falhas visíveis.
+**appointments**
+- adicionar `deleted_at`, `deleted_by`
+- índices `idx_appointments_scheduled_at`, `idx_appointments_status`, `idx_appointments_deleted_at`
 
-6. **Remoção de familiar/membro precisa separar dois conceitos**
-   - “Familiar/paciente” é o paciente cuidado.
-   - “Membro” é usuário logado com acesso à família.
-   - A tela de membros remove usuários da família; a tela de família hoje não oferece remover o familiar/paciente. Vou corrigir o fluxo que estiver quebrado e deixar claro na interface.
+**clinical_events**
+- adicionar `deleted_at`, `deleted_by`
+- índices `idx_clinical_events_event_date`, `idx_clinical_events_deleted_at`
 
-## Plano de correção
+**documents**
+- adicionar `uploaded_by uuid`, `ocr_text text`, `ai_summary text`, `deleted_by uuid`
+- adicionar coluna gerada `search_vector tsvector` (português, sobre title + doctor_name + institution + ocr_text)
+- índice GIN `idx_documents_fts` sobre `search_vector`
+- índices `idx_documents_type` (sobre doc_type), `idx_documents_deleted_at`
 
-### 1. Corrigir navegação do onboarding
-- Alterar `StepFirstAction` para retornar uma ação estruturada, não uma URL interpolada.
-- Alterar `OnboardingFlow.finish()` para navegar com rotas tipadas:
-  - `/familia/$familyId/medicamentos/novo`
-  - `/familia/$familyId/documentos/novo`
-  - `/familia/$familyId/agenda/novo`
-  - `/dashboard`
-- Garantir que `activeFamily` e `activePatient` sejam definidos antes da navegação final.
+**patient_conditions**
+- adicionar `description text`, `diagnosed_at date` (se ausente), `deleted_at`, `deleted_by`
+- índice `idx_patient_conditions_deleted_at`
 
-### 2. Sincronizar familiar ativo com a rota/família correta
-- Criar um pequeno helper/componente reutilizável para resolver o familiar ativo da família atual:
-  - enquanto `FamilyContext` carrega, mostrar loading;
-  - se o familiar ativo não pertence ao `familyId` da rota, selecionar o primeiro familiar daquela família;
-  - se não houver familiar, mostrar CTA para adicionar familiar.
-- Aplicar isso em:
-  - medicamentos
-  - agenda/consultas
-  - documentos
-  - histórico/exames/eventos
+**patient_allergies**
+- adicionar `notes text`, `deleted_at`, `deleted_by`
+- índice `idx_patient_allergies_deleted_at`
 
-### 3. Corrigir seleção de familiar em ações rápidas
-- Na página Família, ao clicar em “Medicamentos”, “Consulta” ou “Documento” dentro do card de um familiar, chamar `setActivePatient(p)` antes de navegar.
-- Garantir o mesmo comportamento nos atalhos do dashboard, se houver ação baseada em familiar ativo.
-- Manter o seletor do header funcionando, mas não depender só dele.
+**emergency_contacts**
+- adicionar `email text`, `deleted_at`, `deleted_by`
+- índice `idx_emergency_contacts_deleted_at`
 
-### 4. Corrigir páginas de listagem que parecem vazias/quebradas
-- Atualizar as rotas de listagem para respeitar `loading`:
-  - `/familia/$familyId/documentos`
-  - `/familia/$familyId/agenda`
-  - `/familia/$familyId/medicamentos`
-  - `/familia/$familyId/historico`
-- Substituir fallback prematuro “Selecione um familiar” por estado de carregamento e CTA correto.
-- Garantir que a listagem consulta sempre o `patientId` resolvido da família da rota.
+**access_logs**
+- adicionar `resource_type text`, `resource_id uuid`, `ip_address text` (em paralelo a `ip`), `user_id uuid` (alias de actor_user_id para compat com spec — opcional, apenas se necessário; preferir manter `actor_user_id`)
+- índice `idx_access_logs_created_at` (sobre accessed_at)
 
-### 5. Revisar cadastro de medicamento, consulta e exame/evento
-- Validar os fluxos de criação:
-  - medicamento em `MedicationForm`
-  - consulta em `AppointmentForm`
-  - exame/evento em `ClinicalEventForm`
-  - documento em `DocumentNewForm`
-- Corrigir navegações inválidas como `navigate({ to: ".." as never })` para rotas absolutas tipadas.
-- Melhorar mensagens de erro dos formulários para expor erro real de permissão/upload quando ocorrer.
-- Invalidar também as queries do dashboard/contadores após criação.
+**Triggers** — garantir `set_updated_at()` em todas as tabelas com `updated_at` que ainda não têm trigger (patient_conditions, patient_allergies, emergency_contacts, emergency_links). Reaproveitar `public.update_updated_at_column()` já existente.
 
-### 6. Ajustar remoção/gestão de familiares e membros
-- Para **membros da família**: manter qualquer membro ativo podendo remover outro membro, conforme regra definida.
-- Para **familiares/pacientes**: adicionar ou corrigir ação de excluir familiar/paciente na tela de família/perfil do paciente, respeitando a política “qualquer membro logado da família pode inserir, deletar ou visualizar”.
-- Após excluir, atualizar cache e selecionar automaticamente outro familiar disponível.
+---
 
-### 7. Backend: confirmar e endurecer policies/buckets sem abrir dados
-- Confirmar em migration que:
-  - usuários autenticados membros da família podem criar/editar/deletar pacientes, medicamentos, consultas, documentos, exames/eventos, alergias, condições e contatos de emergência;
-  - buckets privados continuam privados;
-  - `patient-documents` aceita `{familyId}/{patientId}/...`;
-  - `patient-photos` aceita `{familyId}/...`;
-  - `medication-photos` aceita `{patientId}/...`;
-  - `profile-photos` continua pessoal.
-- Remover ou ajustar policies duplicadas/antigas se houver conflito, sem conceder acesso público indevido.
-- Manter acesso anônimo apenas onde faz sentido: convite por token e link de emergência ativo.
+### 2. RLS — ajustes mínimos para refletir soft delete
 
-### 8. Validação final
-- Testar os fluxos principais no preview:
-  - selecionar familiar A/B;
-  - criar medicamento para cada familiar;
-  - criar consulta;
-  - criar exame/evento;
-  - subir documento/foto;
-  - deletar familiar/paciente;
-  - remover membro da família;
-  - finalizar onboarding escolhendo medicamento/documento/consulta.
-- Checar logs/requisições para confirmar ausência de erros de RLS, storage e navegação.
+Atualizar policies SELECT/UPDATE das tabelas clínicas para incluir `deleted_at IS NULL`:
+- patients, medications, appointments, clinical_events, documents, patient_conditions, patient_allergies, emergency_contacts
+
+Manter o modelo aberto: qualquer membro ativo da família pode INSERT/UPDATE/DELETE (continua usando `app_private.is_family_member`). **Não adotar** as policies de role do spec.
+
+---
+
+### 3. Storage — manter 4 buckets, garantir RLS
+
+Revisar e (re)criar policies dos 4 buckets garantindo que membros ativos da família dona do paciente possam ler/escrever, respeitando convenções já em uso:
+- `patient-documents`: `{familyId}/{patientId}/...`
+- `patient-photos`: `{familyId}/...`
+- `medication-photos`: `{patientId}/...`
+- `profile-photos`: `{userId}/...`
+
+Todos privados. Acesso por signed URLs (já implementado).
+
+---
+
+### 4. Auth
+
+Trigger `handle_new_user` já existe e popula `profiles` — apenas garantir que também grava `onboarding_step = 0`.
+
+Confirmar Auth com: email/senha + Google (já configurado), e-mail de confirmação obrigatório.
+
+---
+
+### 5. Itens do spec que **não** vão entrar (com justificativa)
+
+- **Renomes de colunas** (`name`↔`full_name`, `type`↔`doc_type`, `weight`↔`weight_kg`, `relationship`↔`relation`, `accessed_at`↔`created_at`, `file_mime_type`↔`mime_type`, `file_size_bytes`↔`file_size`, `allergy`↔`name`) — decidido manter nomes atuais para não quebrar o código.
+- **Bucket único `medical-documents`** — decidido manter os 4 buckets atuais.
+- **RLS por role (admin/editor/viewer)** — decidido manter modelo aberto a todos os membros.
+- **Funções `is_family_member`/`has_family_role` em `public`** — já existem como `app_private.is_family_member` (security definer). Mantemos.
+- **`get_solo_admin_families`** — não aplicável (sem distinção de role).
+- **`medication_logs` e `medication_change_history`** (tabelas extras no app) — mantidas; não estão no spec mas são úteis.
+
+---
+
+### 6. Verificação pós-migração
+
+- `supabase--linter` sem erros novos
+- `select tablename from pg_indexes where schemaname='public'` confere todos índices criados
+- Smoke test no app: criar paciente, medicamento, consulta, evento, documento, alergia, contato; soft-delete de cada um; busca de documento por `search_vector`
+- Estrutura de pastas do projeto (`/src/components`, `/src/hooks`, `/src/lib`) já está organizada — sem mudança
+
+---
+
+### Riscos
+
+- A coluna gerada `search_vector` em `documents` requer recriar a tabela se já existir conteúdo conflitante; vou usar `ADD COLUMN` que funciona para colunas geradas em Postgres 12+.
+- Adicionar `deleted_at IS NULL` nas policies altera consultas existentes que não filtram — qualquer registro `soft-deleted` deixará de aparecer. Como ainda não há soft-delete em uso, impacto é nulo no curto prazo.

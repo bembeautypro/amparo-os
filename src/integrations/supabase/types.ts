@@ -24,7 +24,10 @@ export type Database = {
           family_id: string | null
           id: string
           ip: string | null
+          ip_address: string | null
           patient_id: string | null
+          resource_id: string | null
+          resource_type: string | null
           user_agent: string | null
         }
         Insert: {
@@ -36,7 +39,10 @@ export type Database = {
           family_id?: string | null
           id?: string
           ip?: string | null
+          ip_address?: string | null
           patient_id?: string | null
+          resource_id?: string | null
+          resource_type?: string | null
           user_agent?: string | null
         }
         Update: {
@@ -48,7 +54,10 @@ export type Database = {
           family_id?: string | null
           id?: string
           ip?: string | null
+          ip_address?: string | null
           patient_id?: string | null
+          resource_id?: string | null
+          resource_type?: string | null
           user_agent?: string | null
         }
         Relationships: [
@@ -65,6 +74,8 @@ export type Database = {
         Row: {
           address: string | null
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
           doctor_name: string | null
           id: string
           location: string | null
@@ -83,6 +94,8 @@ export type Database = {
         Insert: {
           address?: string | null
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           doctor_name?: string | null
           id?: string
           location?: string | null
@@ -101,6 +114,8 @@ export type Database = {
         Update: {
           address?: string | null
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           doctor_name?: string | null
           id?: string
           location?: string | null
@@ -131,6 +146,8 @@ export type Database = {
           appointment_id: string | null
           created_at: string
           created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           description: string | null
           doctor_name: string | null
           event_date: string
@@ -146,6 +163,8 @@ export type Database = {
           appointment_id?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           doctor_name?: string | null
           event_date?: string
@@ -161,6 +180,8 @@ export type Database = {
           appointment_id?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           doctor_name?: string | null
           event_date?: string
@@ -184,10 +205,12 @@ export type Database = {
       }
       documents: {
         Row: {
+          ai_summary: string | null
           appointment_id: string | null
           clinical_event_id: string | null
           created_at: string
           deleted_at: string | null
+          deleted_by: string | null
           doc_type: Database["public"]["Enums"]["document_type"]
           doctor_name: string | null
           document_date: string | null
@@ -199,16 +222,21 @@ export type Database = {
           institution: string | null
           mime_type: string | null
           notes: string | null
+          ocr_text: string | null
           patient_id: string
+          search_vector: unknown
           tags: string[]
           title: string
           updated_at: string
+          uploaded_by: string | null
         }
         Insert: {
+          ai_summary?: string | null
           appointment_id?: string | null
           clinical_event_id?: string | null
           created_at?: string
           deleted_at?: string | null
+          deleted_by?: string | null
           doc_type?: Database["public"]["Enums"]["document_type"]
           doctor_name?: string | null
           document_date?: string | null
@@ -220,16 +248,21 @@ export type Database = {
           institution?: string | null
           mime_type?: string | null
           notes?: string | null
+          ocr_text?: string | null
           patient_id: string
+          search_vector?: unknown
           tags?: string[]
           title: string
           updated_at?: string
+          uploaded_by?: string | null
         }
         Update: {
+          ai_summary?: string | null
           appointment_id?: string | null
           clinical_event_id?: string | null
           created_at?: string
           deleted_at?: string | null
+          deleted_by?: string | null
           doc_type?: Database["public"]["Enums"]["document_type"]
           doctor_name?: string | null
           document_date?: string | null
@@ -241,10 +274,13 @@ export type Database = {
           institution?: string | null
           mime_type?: string | null
           notes?: string | null
+          ocr_text?: string | null
           patient_id?: string
+          search_vector?: unknown
           tags?: string[]
           title?: string
           updated_at?: string
+          uploaded_by?: string | null
         }
         Relationships: [
           {
@@ -266,6 +302,9 @@ export type Database = {
       emergency_contacts: {
         Row: {
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
+          email: string | null
           id: string
           name: string
           patient_id: string
@@ -275,6 +314,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          email?: string | null
           id?: string
           name: string
           patient_id: string
@@ -284,6 +326,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          email?: string | null
           id?: string
           name?: string
           patient_id?: string
@@ -532,6 +577,8 @@ export type Database = {
       medications: {
         Row: {
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
           dosage: string | null
           end_date: string | null
           form: string | null
@@ -550,6 +597,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           dosage?: string | null
           end_date?: string | null
           form?: string | null
@@ -568,6 +617,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           dosage?: string | null
           end_date?: string | null
           form?: string | null
@@ -597,22 +648,31 @@ export type Database = {
       patient_allergies: {
         Row: {
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
           id: string
           name: string
+          notes: string | null
           patient_id: string
           severity: Database["public"]["Enums"]["severity_level"]
         }
         Insert: {
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           name: string
+          notes?: string | null
           patient_id: string
           severity?: Database["public"]["Enums"]["severity_level"]
         }
         Update: {
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           name?: string
+          notes?: string | null
           patient_id?: string
           severity?: Database["public"]["Enums"]["severity_level"]
         }
@@ -629,27 +689,39 @@ export type Database = {
       patient_conditions: {
         Row: {
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
+          description: string | null
           diagnosed_at: string | null
           id: string
           name: string
           patient_id: string
           status: Database["public"]["Enums"]["condition_status"]
+          updated_at: string
         }
         Insert: {
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          description?: string | null
           diagnosed_at?: string | null
           id?: string
           name: string
           patient_id: string
           status?: Database["public"]["Enums"]["condition_status"]
+          updated_at?: string
         }
         Update: {
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          description?: string | null
           diagnosed_at?: string | null
           id?: string
           name?: string
           patient_id?: string
           status?: Database["public"]["Enums"]["condition_status"]
+          updated_at?: string
         }
         Relationships: [
           {
@@ -666,13 +738,17 @@ export type Database = {
           birth_date: string | null
           blood_type: Database["public"]["Enums"]["blood_type"] | null
           created_at: string
+          created_by: string | null
           critical_notes: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           family_id: string
           full_name: string
           height_cm: number | null
           id: string
           insurance_name: string | null
           insurance_number: string | null
+          notes: string | null
           photo_url: string | null
           preferred_hospital: string | null
           primary_doctor: string | null
@@ -684,13 +760,17 @@ export type Database = {
           birth_date?: string | null
           blood_type?: Database["public"]["Enums"]["blood_type"] | null
           created_at?: string
+          created_by?: string | null
           critical_notes?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           family_id: string
           full_name: string
           height_cm?: number | null
           id?: string
           insurance_name?: string | null
           insurance_number?: string | null
+          notes?: string | null
           photo_url?: string | null
           preferred_hospital?: string | null
           primary_doctor?: string | null
@@ -702,13 +782,17 @@ export type Database = {
           birth_date?: string | null
           blood_type?: Database["public"]["Enums"]["blood_type"] | null
           created_at?: string
+          created_by?: string | null
           critical_notes?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           family_id?: string
           full_name?: string
           height_cm?: number | null
           id?: string
           insurance_name?: string | null
           insurance_number?: string | null
+          notes?: string | null
           photo_url?: string | null
           preferred_hospital?: string | null
           primary_doctor?: string | null
@@ -732,6 +816,7 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          onboarding_step: number
           phone: string | null
           updated_at: string
         }
@@ -740,6 +825,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          onboarding_step?: number
           phone?: string | null
           updated_at?: string
         }
@@ -748,6 +834,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          onboarding_step?: number
           phone?: string | null
           updated_at?: string
         }
