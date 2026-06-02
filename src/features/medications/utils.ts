@@ -1,14 +1,26 @@
 import type { ScheduleEntry } from "./types";
 
 export function parseSchedule(raw: unknown): ScheduleEntry[] {
-  if (!Array.isArray(raw)) return [];
-  return raw
-    .filter(
-      (item): item is { time: unknown } =>
-        typeof item === "object" && item !== null && "time" in item,
-    )
-    .map((item) => ({ time: String((item as { time: unknown }).time) }))
-    .filter((e) => /^\d{2}:\d{2}$/.test(e.time));
+  // Preferred shape: { times: ["08:00", ...] }
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    const times = (raw as { times?: unknown }).times;
+    if (Array.isArray(times)) {
+      return times
+        .map((t) => ({ time: String(t) }))
+        .filter((e) => /^\d{2}:\d{2}$/.test(e.time));
+    }
+  }
+  // Legacy shape: [{ time: "08:00" }, ...]
+  if (Array.isArray(raw)) {
+    return raw
+      .filter(
+        (item): item is { time: unknown } =>
+          typeof item === "object" && item !== null && "time" in item,
+      )
+      .map((item) => ({ time: String((item as { time: unknown }).time) }))
+      .filter((e) => /^\d{2}:\d{2}$/.test(e.time));
+  }
+  return [];
 }
 
 export function formatTime(hhmm: string) {
