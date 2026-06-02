@@ -151,10 +151,18 @@ export function useActiveMedications(patientId: string | undefined) {
         .eq("patient_id", patientId!)
         .eq("status", "active");
       if (error) throw error;
-      return (data ?? []).map((m) => ({
-        ...m,
-        schedule: Array.isArray(m.schedule) ? (m.schedule as string[]) : null,
-      })) as Medication[];
+      return (data ?? []).map((m) => {
+        let times: string[] | null = null;
+        const s = m.schedule as unknown;
+        if (s && typeof s === "object" && !Array.isArray(s) && Array.isArray((s as { times?: unknown }).times)) {
+          times = ((s as { times: unknown[] }).times).map((t) => String(t));
+        } else if (Array.isArray(s)) {
+          times = (s as Array<{ time?: unknown }>)
+            .map((e) => (e && typeof e === "object" && "time" in e ? String((e as { time: unknown }).time) : ""))
+            .filter(Boolean);
+        }
+        return { ...m, schedule: times } as Medication;
+      });
     },
   });
 }
