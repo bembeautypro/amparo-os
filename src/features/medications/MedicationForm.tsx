@@ -111,8 +111,13 @@ function fromExisting(m: Medication): FormState {
 function serializeForDb(s: FormState) {
   const freqDef = FREQ_OPTIONS.find((f) => f.value === s.frequency);
   const freqLabel = freqDef?.label ?? null;
-  const scheduleDb =
+  const scheduleEntries =
     freqDef?.slots && freqDef.slots > 0 ? s.schedule.slice(0, freqDef.slots) : null;
+  // DB CHECK constraint requires { "times": [...] }
+  const scheduleDb =
+    scheduleEntries && scheduleEntries.length > 0
+      ? { times: scheduleEntries.map((e) => e.time) }
+      : null;
   return {
     name: s.name.trim(),
     generic_name: s.generic_name.trim() || null,
