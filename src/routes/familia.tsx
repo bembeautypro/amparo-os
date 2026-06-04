@@ -77,7 +77,14 @@ function FamilyPage() {
 
   const deleteMut = useMutation({
     mutationFn: async (p: Patient) => {
-      const { error } = await supabase.from("patients").delete().eq("id", p.id);
+      const { data: u } = await supabase.auth.getUser();
+      const { error } = await supabase
+        .from("patients")
+        .update({
+          deleted_at: new Date().toISOString(),
+          deleted_by: u.user?.id ?? null,
+        })
+        .eq("id", p.id);
       if (error) throw error;
     },
     onSuccess: (_, p) => {

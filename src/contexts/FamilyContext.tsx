@@ -82,6 +82,7 @@ export function FamilyProvider({ children }: { children: ReactNode }) {
         .from("patients")
         .select("id, full_name, relation, photo_url, family_id")
         .eq("family_id", activeFamily!.id)
+        .is("deleted_at", null)
         .order("created_at", { ascending: true });
       if (error) throw error;
       return (data ?? []).map((p) => ({

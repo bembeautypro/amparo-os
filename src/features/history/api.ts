@@ -17,6 +17,7 @@ export async function fetchClinicalEvents(
     .from("clinical_events")
     .select("*")
     .eq("patient_id", patientId)
+    .is("deleted_at", null)
     .order("event_date", { ascending: false });
 
   if (filters.search && filters.search.trim()) {

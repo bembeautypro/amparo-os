@@ -30,15 +30,14 @@ export function useActivePatientForFamily(familyId: string): {
     }
   }, [loading, matches, familyPatients, setActivePatient]);
 
-  // While the family list is loaded but matches activeFamily not yet
-  // pointing to this family's patients, treat as loading to avoid flicker.
-  const stillResolving =
-    loading ||
-    (activeFamily?.id !== familyId && patients.length === 0);
+  // Only treat as loading while the context is genuinely loading.
+  // Once loading=false, if there are no patients for this family, surface
+  // empty=true so callers can render the empty state instead of spinning forever.
+  void activeFamily;
 
   return {
     patient: matches ?? familyPatients[0] ?? null,
-    loading: stillResolving,
+    loading,
     empty: !loading && familyPatients.length === 0,
   };
 }
