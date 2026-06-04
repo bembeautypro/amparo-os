@@ -334,7 +334,12 @@ export function AppointmentForm({
             type="button"
             variant="outline"
             className="flex-1"
-            onClick={() => navigate({ to: "/agenda" })}
+            onClick={() =>
+              navigate({
+                to: "/familia/$familyId/agenda",
+                params: { familyId },
+              })
+            }
           >
             Cancelar
           </Button>

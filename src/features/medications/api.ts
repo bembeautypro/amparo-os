@@ -10,6 +10,7 @@ export async function fetchMedications(
     .select("*")
     .eq("patient_id", patientId)
     .eq("status", status)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as Medication[];

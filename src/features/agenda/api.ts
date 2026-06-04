@@ -6,6 +6,7 @@ export async function fetchAppointments(patientId: string): Promise<Appointment[
     .from("appointments")
     .select("*")
     .eq("patient_id", patientId)
+    .is("deleted_at", null)
     .order("scheduled_at", { ascending: true });
   if (error) throw error;
   return (data ?? []) as Appointment[];
@@ -39,6 +40,7 @@ export async function fetchDoneAppointments(
     .select("*")
     .eq("patient_id", patientId)
     .eq("status", "done")
+    .is("deleted_at", null)
     .order("scheduled_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as Appointment[];
