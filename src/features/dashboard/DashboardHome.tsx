@@ -3,7 +3,7 @@ import { Users } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useFamilyContext } from "@/contexts/FamilyContext";
-import { PatientSwitcher } from "./PatientSwitcher";
+
 import { QuickActionsFab } from "./QuickActionsFab";
 import { PatientCard } from "./cards/PatientCard";
 import { AlertsCard } from "./cards/AlertsCard";
