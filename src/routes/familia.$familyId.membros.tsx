@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { UserPlus, Users, Mail, RefreshCw, X, Loader2, History, Copy, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -48,7 +48,7 @@ function MembersPage() {
   const { familyId } = Route.useParams();
   const { user } = useAuth();
   const qc = useQueryClient();
-  const navigate = useNavigate();
+  
   const [inviteOpen, setInviteOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
 
