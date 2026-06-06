@@ -58,8 +58,6 @@ export function DashboardHome() {
 
   return (
     <>
-      <PatientSwitcher />
-
       <div className="space-y-3 pt-3">
         <PatientCard patientId={activePatient.id} />
         <AlertsCard patientId={activePatient.id} familyId={activeFamily.id} />
