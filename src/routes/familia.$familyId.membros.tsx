@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { UserPlus, Users, Mail, RefreshCw, X, Loader2, History } from "lucide-react";
+import { UserPlus, Users, Mail, RefreshCw, X, Loader2, History, Copy, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -17,6 +17,7 @@ import {
   listPendingInvitations,
   resendInvitation,
   cancelInvitation,
+  buildInviteUrl,
 } from "@/features/family/api";
 import { InviteDialog } from "@/features/family/InviteDialog";
 import { MemberActionsSheet } from "@/features/family/MemberActionsSheet";
@@ -47,7 +48,7 @@ function MembersPage() {
   const { familyId } = Route.useParams();
   const { user } = useAuth();
   const qc = useQueryClient();
-  const navigate = useNavigate();
+  
   const [inviteOpen, setInviteOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
 
@@ -197,11 +198,33 @@ function MembersPage() {
                   </div>
                 </div>
                 {isAdmin && (
-                  <div className="mt-3 flex gap-2">
+                  <div className="mt-3 grid grid-cols-2 gap-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex-1"
+                      onClick={() => {
+                        navigator.clipboard.writeText(buildInviteUrl(inv.token));
+                        toast.success("Link copiado!");
+                      }}
+                    >
+                      <Copy className="mr-2 h-3 w-3" />
+                      Copiar link
+                    </Button>
+                    <Button variant="outline" size="sm" asChild>
+                      <a
+                        href={`https://wa.me/?text=${encodeURIComponent(
+                          `Você foi convidado para o Amparo${familyQ.data?.name ? ` (família ${familyQ.data.name})` : ""}: ${buildInviteUrl(inv.token)}`,
+                        )}`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <MessageCircle className="mr-2 h-3 w-3" />
+                        WhatsApp
+                      </a>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
                       disabled={resendMut.isPending}
                       onClick={() => resendMut.mutate(inv)}
                     >
@@ -210,12 +233,12 @@ function MembersPage() {
                       ) : (
                         <RefreshCw className="mr-2 h-3 w-3" />
                       )}
-                      Reenviar
+                      Renovar 7 dias
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="flex-1 text-destructive hover:text-destructive"
+                      className="text-destructive hover:text-destructive"
                       onClick={() => cancelMut.mutate(inv)}
                     >
                       <X className="mr-2 h-3 w-3" />

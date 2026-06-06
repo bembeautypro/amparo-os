@@ -43,22 +43,45 @@ export async function createInvitation(input: {
   role: FamilyRole;
   invitedBy: string;
 }): Promise<Invitation> {
+  const email = input.email.trim().toLowerCase();
+
+  // Pre-check: existing pending invitation for the same email
+  const { data: existingInv } = await supabase
+    .from("invitations")
+    .select("*")
+    .eq("family_id", input.familyId)
+    .eq("email", email)
+    .eq("status", "pending")
+    .gt("expires_at", new Date().toISOString())
+    .maybeSingle();
+  if (existingInv) {
+    throw new Error(
+      "Já existe um convite pendente para este email. Reenvie ou cancele o atual antes de criar outro.",
+    );
+  }
+
   const expiresAt = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();
   const { data, error } = await supabase
     .from("invitations")
     .insert({
       family_id: input.familyId,
-      email: input.email.trim().toLowerCase(),
+      email,
       role: input.role,
       invited_by: input.invitedBy,
       expires_at: expiresAt,
     })
     .select("*")
     .single();
-  if (error) throw error;
-  await logActivity(input.familyId, "invitation_created", { email: input.email, role: input.role });
+  if (error) {
+    if (error.message.toLowerCase().includes("duplicate")) {
+      throw new Error("Já existe um convite ativo para este email.");
+    }
+    throw new Error(error.message);
+  }
+  await logActivity(input.familyId, "invitation_created", { email, role: input.role });
   return data as Invitation;
 }
+
 
 export async function resendInvitation(inv: Invitation): Promise<Invitation> {
   const expiresAt = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();

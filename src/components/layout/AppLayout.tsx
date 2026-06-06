@@ -4,6 +4,7 @@ import { AppSidebar } from "./AppSidebar";
 import { BottomNav } from "./BottomNav";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { FamilyProvider } from "@/contexts/FamilyContext";
+import { PatientSwitcher } from "@/features/dashboard/PatientSwitcher";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -19,6 +20,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
           <main className="flex-1 pb-24 md:pb-10">
             <div className="mx-auto w-full max-w-6xl px-4 py-6 md:px-8 md:py-10">
+              <PatientSwitcher />
               {children}
             </div>
           </main>

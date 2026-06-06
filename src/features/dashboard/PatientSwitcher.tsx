@@ -25,7 +25,7 @@ export function PatientSwitcher() {
     <div
       role="tablist"
       aria-label="Selecionar familiar"
-      className="sticky top-16 z-20 -mx-4 border-b border-border bg-background/85 px-4 py-2 backdrop-blur md:-mx-8 md:px-8"
+      className="sticky top-16 z-20 -mx-4 mb-4 border-b border-border bg-background/85 px-4 py-2 backdrop-blur md:-mx-8 md:px-8"
       style={{ marginTop: "-1.5rem" }}
     >
       <div className="flex gap-2 overflow-x-auto">
