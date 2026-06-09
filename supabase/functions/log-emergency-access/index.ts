@@ -3,6 +3,7 @@
 // bypassing RLS so anon visitors can read the public emergency page) and
 // records the access in access_logs.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,22 +11,34 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+const MAX_BODY_SIZE = 1024; // 1 KB
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    const contentLength = req.headers.get("content-length");
+    if (contentLength && parseInt(contentLength, 10) > MAX_BODY_SIZE) {
+      return json({ error: "Payload muito grande" }, 400);
+    }
+
     const url = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(url, serviceKey, {
       auth: { persistSession: false },
     });
 
-    const { token } = await req.json().catch(() => ({}));
-    if (!token || typeof token !== "string") {
-      return json({ error: "Missing token" }, 400);
+    const body = await req.json().catch(() => ({}));
+
+    const schema = z.object({ token: z.string().uuid() });
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+      return json({ error: "Token inválido" }, 400);
     }
+
+    const token = parsed.data.token;
 
     // Validate token
     const { data: link, error: linkErr } = await supabase
